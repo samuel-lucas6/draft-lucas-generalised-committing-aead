@@ -15,7 +15,7 @@ pi: [toc, sortrefs, symrefs]
 author:
  -
     name: Samuel Lucas
-	organization: Individual Contributor
+    organization: Individual Contributor
     email: samuel-lucas6@pm.me
 
 informative:
@@ -89,7 +89,7 @@ informative:
         ins: T. Ristenpart
         name: Thomas Ristenpart
         org: Cornell Tech
-    date: 2017
+     date: 2017
 
   BN00:
     title: "Authenticated encryption: Relations among notions and analysis of the generic composition paradigm"
@@ -106,7 +106,7 @@ informative:
         ins: C. Namprempre
         name: Chanathip Namprempre
         org: Thammasat University
-    date: 2000
+     date: 2000
 
 --- abstract
 
@@ -235,12 +235,12 @@ computedTag = MAC(associatedData || ciphertextNoTag || LE64(associatedData.Lengt
 ZeroMemory(macKey)
 
 if (ConstantTimeEquals(tag, computedTag) == false)
-	ZeroMemory(encryptionKey)
-	return "authentication failed" error
+    ZeroMemory(encryptionKey)
+    return "authentication failed" error
 else
-	plaintext = Decrypt(ciphertextNoTag, nonce, encryptionKey)
-	ZeroMemory(encryptionKey)
-	return plaintext
+    plaintext = Decrypt(ciphertextNoTag, nonce, encryptionKey)
+    ZeroMemory(encryptionKey)
+    return plaintext
 ~~~
 
 # ChaCha20-BLAKE2b
