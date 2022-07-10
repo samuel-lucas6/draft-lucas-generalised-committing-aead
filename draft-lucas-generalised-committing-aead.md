@@ -1,6 +1,6 @@
 ---
 title: "Encrypt-then-MAC for Committing AEAD (cAEAD)"
-docname: draft-lucas-generalised-committing-aead
+docname: draft-lucas-generalised-committing-aead-latest
 category: info
 
 ipr: trust200902
