@@ -89,7 +89,7 @@ informative:
         ins: T. Ristenpart
         name: Thomas Ristenpart
         org: Cornell Tech
-     date: 2017
+    date: 2017
 
   BN00:
     title: "Authenticated encryption: Relations among notions and analysis of the generic composition paradigm"
@@ -106,7 +106,7 @@ informative:
         ins: C. Namprempre
         name: Chanathip Namprempre
         org: Thammasat University
-     date: 2000
+    date: 2000
 
 --- abstract
 
