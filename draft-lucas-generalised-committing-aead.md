@@ -221,12 +221,12 @@ Outputs:
 Steps:
 
 ~~~
-encryptionKey = MAC(UTF8(ENCRYPTION_CONTEXT), key, K_LEN)
-macKey = MAC(UTF8(MAC_CONTEXT) || nonce, key, K_LEN)
-
 tag = ciphertext.Slice(ciphertext.Length - T_LEN, T_LEN)
 
 ciphertextNoTag = ciphertext.Slice(0, ciphertext.Length - T_LEN)
+
+encryptionKey = MAC(UTF8(ENCRYPTION_CONTEXT), key, K_LEN)
+macKey = MAC(UTF8(MAC_CONTEXT) || nonce, key, K_LEN)
 
 computedTag = MAC(associatedData || ciphertextNoTag || LE64(associatedData.Length) || LE64(ciphertextNoTag.Length), macKey, T_LEN)
 
