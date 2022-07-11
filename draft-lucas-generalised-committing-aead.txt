@@ -116,7 +116,7 @@ Table of Contents
    harmless message from the sender into an abusive one.
 
    Whilst such attacks only apply in certain scenarios, developers
-   intuitvely expect an AEAD to have this commitment property,
+   intuitively expect an AEAD to have this commitment property,
    increasing the risk of falling prey to this type of protocol
    vulnerability.  Certain mitigations must be built into cryptographic
    libraries, developers may be unaware of mitigations they can do
@@ -219,7 +219,7 @@ Table of Contents
        hash function used within HMAC [RFC2104].
 
    Importantly, the MAC MUST be collision resistant and hash-based.
-   This ensures the ciphertext is a commitment of all of the inputs,
+   This ensures the ciphertext is a commitment of all the inputs,
    corresponding to security notion CMT-4 [BH22].  This provides the
    best security and ease of use by default.
 
