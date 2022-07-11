@@ -219,7 +219,9 @@ Table of Contents
        hash function used within HMAC [RFC2104].
 
    Importantly, the MAC MUST be collision resistant and hash-based.
-   This ensures the ciphertext is a commitment of the key and message.
+   This ensures the ciphertext is a commitment of all of the inputs,
+   corresponding to security notion CMT-4 [BH22].  This provides the
+   best security and ease of use by default.
 
 3.1.  Authenticated Encryption
 
@@ -414,6 +416,12 @@ else
               Symposium (USENIX Security 22), 2022,
               <https://www.usenix.org/conference/usenixsecurity22/
               presentation/albertini>.
+
+   [BH22]     Bellare, M. and V. T. Hoang, "Efficient Schemes for
+              Committing Authenticated Encryption", EUROCRYPT 2022.
+              Lecture Notes in Computer Science, vol 13276, pp. 845-875,
+              DOI 10.1007/978-3-031-07085-3_29, 2022,
+              <https://eprint.iacr.org/2022/268>.
 
    [BN00]     Bellare, M. and C. Namprempre, "Authenticated encryption:
               Relations among notions and analysis of the generic

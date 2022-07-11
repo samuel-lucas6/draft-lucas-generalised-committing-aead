@@ -1306,7 +1306,7 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
         <li id="section-3-2.2">A collision-resistant keyed hash function or collision-resistant hash function used within HMAC <span>[<a href="#RFC2104" class="xref">RFC2104</a>]</span>.<a href="#section-3-2.2" class="pilcrow">¶</a>
 </li>
       </ol>
-<p id="section-3-3">Importantly, the MAC <span class="bcp14">MUST</span> be collision resistant and hash-based. This ensures the ciphertext is a commitment of the key and message.<a href="#section-3-3" class="pilcrow">¶</a></p>
+<p id="section-3-3">Importantly, the MAC <span class="bcp14">MUST</span> be collision resistant and hash-based. This ensures the ciphertext is a commitment of all of the inputs, corresponding to security notion CMT-4 <span>[<a href="#BH22" class="xref">BH22</a>]</span>. This provides the best security and ease of use by default.<a href="#section-3-3" class="pilcrow">¶</a></p>
 <div id="authenticated-encryption">
 <section id="section-3.1">
         <h3 id="name-authenticated-encryption">
@@ -1510,6 +1510,10 @@ else
 <dt id="ADGKLS22">[ADGKLS22]</dt>
         <dd>
 <span class="refAuthor">Albertini, A.</span>, <span class="refAuthor">Duong, T.</span>, <span class="refAuthor">Gueron, S.</span>, <span class="refAuthor">Kölbl, S.</span>, <span class="refAuthor">Luykx, A.</span>, and <span class="refAuthor">S. Schmieg</span>, <span class="refTitle">"How to Abuse and Fix Authenticated Encryption Without Key Commitment"</span>, <span class="refContent">31st USENIX Security Symposium (USENIX Security 22)</span>, <time datetime="2022" class="refDate">2022</time>, <span>&lt;<a href="https://www.usenix.org/conference/usenixsecurity22/presentation/albertini">https://www.usenix.org/conference/usenixsecurity22/presentation/albertini</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="BH22">[BH22]</dt>
+        <dd>
+<span class="refAuthor">Bellare, M.</span> and <span class="refAuthor">V. T. Hoang</span>, <span class="refTitle">"Efficient Schemes for Committing Authenticated Encryption"</span>, <span class="refContent">EUROCRYPT 2022. Lecture Notes in Computer Science, vol 13276, pp. 845-875</span>, <span class="seriesInfo">DOI 10.1007/978-3-031-07085-3_29</span>, <time datetime="2022" class="refDate">2022</time>, <span>&lt;<a href="https://eprint.iacr.org/2022/268">https://eprint.iacr.org/2022/268</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="BN00">[BN00]</dt>
         <dd>
