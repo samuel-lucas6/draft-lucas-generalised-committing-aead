@@ -429,6 +429,6 @@ associatedData: 76312e302e30
 
 ChaCha20 and Poly1305 were designed by Daniel J. Bernstein.
 
-BLAKE2 was designed by Jean-Philippe Aumasson, Luca Henzen, Willi Meier, and Raphael C.-W. Phan.
+BLAKE2 was designed by Jean-Philippe Aumasson, Samuel Neves, Zooko Wilcox-O'Hearn, and Christian Winnerlein.
 
 HMAC was designed by Mihir Bellare, Ran Canetti, and Hugo Krawczyk.
