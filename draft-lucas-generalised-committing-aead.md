@@ -285,7 +285,9 @@ The context strings are:
 
 The security of this generalised scheme depends on the unauthenticated cipher and collision-resistant, hash-based MAC used. For instance, ChaCha20 should provide 256-bit security against plaintext recovery, and HMAC-SHA256 should provide 256-bit security against forgery attacks. A 256-bit tag provides 128-bit security against collisions. This collision resistance should make it infeasible for a ciphertext to be decrypted under multiple keys.
 
-The nonce MUST NOT be repeated or reused for a given key. Doing so is catastrophic for security. For example, it would result in identical keystreams with stream ciphers, which would leak the XOR of the plaintexts.
+The nonce MUST NOT be repeated or reused for a given key. Doing so is catastrophic for security. For example, it results in identical keystreams with stream ciphers, which leaks the XOR of the plaintexts.
+
+The authentication tag comparison MUST be done in constant time to avoid leaking information via timing.
 
 If authentication fails, the ciphertext MUST NOT be decrypted internally, and the decrypted plaintext MUST NOT be given as output.
 
