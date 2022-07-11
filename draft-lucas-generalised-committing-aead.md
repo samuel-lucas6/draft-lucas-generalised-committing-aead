@@ -108,7 +108,7 @@ informative:
 
 --- abstract
 
-This document describes how to construct a committing authenticated encryption with associated data (cAEAD) algorithm by combining an unauthenticated cipher and collision resistant, hash-based message authentication code (MAC).
+This document describes how to construct a committing authenticated encryption with associated data (cAEAD) algorithm by combining an unauthenticated cipher and collision-resistant, hash-based message authentication code (MAC).
 
 --- middle
 
@@ -118,9 +118,9 @@ A limitation of many existing AEAD schemes, such as ChaCha20-Poly1305 {{!RFC8439
 
 Whilst such attacks only apply in certain scenarios (e.g. when there is an oracle that knows the encryption key), developers intuitvely expect an AEAD to have this commitment property, increasing the risk of falling prey to this type of protocol vulnerability. Mitigations may not be built into cryptographic libraries, developers may be unaware of the mitigations themselves, and some mitigations may leak information. For example, encrypting zeros in the first block may lead to timing differences during decryption, and prepending an unsalted hash of the key leaks its identity.
 
-However, Encrypt-then-MAC with the encryption key and authentication key derived from the same input keying material and a 256-bit or greater authentication tag from a collision resistant, hash-based MAC is committing {{GLR17}}. Encrypt-then-MAC has been widely used (e.g. it forms the basis of ChaCha20-Poly1305), is well analysed {{BN00}}, can offer additional security against forgeries with a larger tag, and can be more performant than some existing AEAD schemes under certain circumstances (e.g. depending on the MAC).
+However, Encrypt-then-MAC with the encryption key and authentication key derived from the same input keying material and a 256-bit or greater authentication tag from a collision-resistant, hash-based MAC is committing {{GLR17}}. Encrypt-then-MAC has been widely used (e.g. it forms the basis of ChaCha20-Poly1305), is well analysed {{BN00}}, can offer additional security against forgeries with a larger tag, and can be more performant than some existing AEAD schemes under certain circumstances (e.g. depending on the MAC).
 
-The partitioning oracle attack authors recommend using a committing AEAD (cAEAD) by default when non-committing AEAD vulnerabilities cannot be ruled out {{LGR21}}. Therefore, this document introduces a simple Encrypt-then-MAC cAEAD scheme that can be implemented using an unauthenticated cipher and collision resistant, hash-based MAC from a cryptographic library. For instance, ChaCha20 {{!RFC8439}} and BLAKE2b {{!RFC7693}} could be used.
+The partitioning oracle attack authors recommend using a committing AEAD (cAEAD) by default when non-committing AEAD vulnerabilities cannot be ruled out {{LGR21}}. Therefore, this document introduces a simple Encrypt-then-MAC cAEAD scheme that can be implemented using an unauthenticated cipher and collision-resistant, hash-based MAC from a cryptographic library. For instance, ChaCha20 {{!RFC8439}} and BLAKE2b {{!RFC7693}} could be used.
 
 # Conventions and Definitions
 
@@ -159,8 +159,10 @@ The meanings of these parameters are defined in {{!RFC5116, Section 4}}.
 
 This construction combines two primitives:
 
-1. A stream cipher or block cipher.
-2. A collision resistant keyed hash function or hash function used within HMAC {{!RFC2104}}.
+1. An unauthenticated stream cipher or block cipher.
+2. A collision-resistant keyed hash function or collision-resistant hash function used within HMAC {{!RFC2104}}.
+
+Importantly, the MAC MUST be collision resistant and hash-based. This ensures the ciphertext is a commitment of the key and message.
 
 ## Authenticated Encryption
 
@@ -260,7 +262,7 @@ The context strings are:
 
 # Security Considerations
 
-The security of this generalised scheme depends on the unauthenticated cipher and collision resistant, hash-based MAC used. For instance, ChaCha20 should provide 256-bit security against plaintext recovery, and HMAC-SHA256 should provide 256-bit security against forgery attacks. A 256-bit tag provides 128-bit security against collisions. This collision resistance should make it infeasible for a ciphertext to be decrypted under multiple keys.
+The security of this generalised scheme depends on the unauthenticated cipher and collision-resistant, hash-based MAC used. For instance, ChaCha20 should provide 256-bit security against plaintext recovery, and HMAC-SHA256 should provide 256-bit security against forgery attacks. A 256-bit tag provides 128-bit security against collisions. This collision resistance should make it infeasible for a ciphertext to be decrypted under multiple keys.
 
 The nonce MUST NOT be repeated or reused for a given key. Doing so is catastrophic for security. For example, it would result in identical keystreams with stream ciphers, which would leak the XOR of the plaintexts.
 
