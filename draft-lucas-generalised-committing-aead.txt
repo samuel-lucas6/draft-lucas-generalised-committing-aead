@@ -99,17 +99,17 @@ Table of Contents
    This has led to practical attacks, such as the partitioning oracle
    attack [LGR21], which can allow an attacker to guess many encryption
    passwords at once by repeatedly providing a ciphertext that
-   successfully decrypts under different keys to an oracle (a server
-   that knows the encryption key).  Such a ciphertext that potentially
-   decrypts under thousands of keys can be quickly computed by an
-   attacker, although the complexity and scalability of attacks depends
-   on the AEAD.  This exploits a lack of key commitment and may be
-   extendable to other online scenarios, such as discovering which
+   successfully decrypts under different keys to an oracle (e.g. a
+   server that knows the encryption key).  Such a ciphertext that
+   potentially decrypts under thousands of keys can be quickly computed
+   by an attacker, although the complexity and scalability of attacks
+   depends on the AEAD.  This exploits a lack of key commitment and may
+   be extendable to other online scenarios, such as discovering which
    public key is being used from a set of public keys.
 
-   Another type of attack was demonstrated on Facebook's message
-   franking scheme [GLR17], which exploited a lack of message
-   commitment.  Due to end-to-end encryption, Facebook does not know the
+   Another type of attack was demonstrated on Facebook Messenger's
+   message franking scheme [GLR17], which exploited a lack of message
+   commitment.  Due to end-to-end encryption, Facebook does not know a
    recipient's key.  Therefore, when reporting a received message as
    abusive, the recipient must send their key for verification.
    However, a fake key could be used by the recipient to transform a
@@ -118,12 +118,12 @@ Table of Contents
    Whilst such attacks only apply in certain scenarios, developers
    intuitively expect an AEAD to have this commitment property,
    increasing the risk of falling prey to this type of protocol
-   vulnerability.  Certain mitigations must be built into cryptographic
-   libraries, developers may be unaware of mitigations they can do
-   themselves, and some mitigations may leak information.  For example,
-   encrypting zeros in the first block may lead to timing differences
-   during decryption, and prepending an unsalted hash of the key leaks
-   its identity.
+   vulnerability.  Certain suggested mitigations must be built into
+   cryptographic libraries, developers may be unaware of mitigations
+   they can do themselves, and some mitigations may leak information.
+   For example, encrypting zeros in the first block may lead to timing
+   differences during decryption, and prepending an unsalted hash of the
+   key leaks its identity.
 
    However, Encrypt-then-MAC with the encryption key and authentication
    key derived from the same input keying material and a 256-bit or
@@ -218,7 +218,7 @@ Table of Contents
    2.  A collision-resistant keyed hash function or collision-resistant
        hash function used within HMAC [RFC2104].
 
-   Importantly, the MAC MUST be collision resistant and hash-based.
+   Importantly, the MAC MUST be hash-based and collision resistant.
    This ensures the ciphertext is a commitment of all the inputs,
    corresponding to security notion CMT-4 [BH22].  This provides the
    best security and ease of use by default.
