@@ -137,7 +137,7 @@ This has led to practical attacks, such as the partitioning oracle attack {{LGR2
 
 Another type of attack was demonstrated on Facebook's message franking scheme {{GLR17}}, which exploited a lack of message commitment. Due to end-to-end encryption, Facebook does not know the recipient's key. Therefore, when reporting a received message as abusive, the recipient must send their key for verification. However, a fake key could be used by the recipient to transform a harmless message from the sender into an abusive one.
 
-Whilst such attacks only apply in certain scenarios, developers intuitvely expect an AEAD to have this commitment property, increasing the risk of falling prey to this type of protocol vulnerability. Certain mitigations must be built into cryptographic libraries, developers may be unaware of mitigations they can do themselves, and some mitigations may leak information. For example, encrypting zeros in the first block may lead to timing differences during decryption, and prepending an unsalted hash of the key leaks its identity.
+Whilst such attacks only apply in certain scenarios, developers intuitively expect an AEAD to have this commitment property, increasing the risk of falling prey to this type of protocol vulnerability. Certain mitigations must be built into cryptographic libraries, developers may be unaware of mitigations they can do themselves, and some mitigations may leak information. For example, encrypting zeros in the first block may lead to timing differences during decryption, and prepending an unsalted hash of the key leaks its identity.
 
 However, Encrypt-then-MAC with the encryption key and authentication key derived from the same input keying material and a 256-bit or greater authentication tag from a collision-resistant, hash-based MAC is committing {{GLR17}}. Encrypt-then-MAC has been widely used (e.g. it forms the basis of ChaCha20-Poly1305), is well analysed {{BN00}}, can offer additional security against forgeries thanks to the larger tag, and can be more performant than some existing AEAD schemes under certain circumstances (e.g. depending on the MAC and size of the message).
 
@@ -183,7 +183,7 @@ This construction combines two primitives:
 1. An unauthenticated stream cipher or block cipher.
 2. A collision-resistant keyed hash function or collision-resistant hash function used within HMAC {{!RFC2104}}.
 
-Importantly, the MAC MUST be collision resistant and hash-based. This ensures the ciphertext is a commitment of all of the inputs, corresponding to security notion CMT-4 {{BH22}}. This provides the best security and ease of use by default.
+Importantly, the MAC MUST be collision resistant and hash-based. This ensures the ciphertext is a commitment of all the inputs, corresponding to security notion CMT-4 {{BH22}}. This provides the best security and ease of use by default.
 
 ## Authenticated Encryption
 
