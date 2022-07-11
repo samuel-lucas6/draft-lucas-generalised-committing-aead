@@ -49,6 +49,23 @@ informative:
         org: Google
     date: 2022
 
+  BH22:
+    title: "Efficient Schemes for Committing Authenticated Encryption"
+    rc: "EUROCRYPT 2022. Lecture Notes in Computer Science, vol 13276, pp. 845-875"
+    target: https://eprint.iacr.org/2022/268
+    seriesinfo:
+      DOI: 10.1007/978-3-031-07085-3_29
+    author:
+      -
+        ins: M. Bellare
+        name: Mihir Bellare
+        org: University of California
+      -
+        ins: V. T. Hoang
+        name: Viet Tung Hoang
+        org: Florida State University
+    date: 2022
+
   LGR21:
     title: "Partitioning Oracle Attacks"
     rc: "30th USENIX Security Symposium (USENIX Security 21), pp. 195–212"
@@ -166,7 +183,7 @@ This construction combines two primitives:
 1. An unauthenticated stream cipher or block cipher.
 2. A collision-resistant keyed hash function or collision-resistant hash function used within HMAC {{!RFC2104}}.
 
-Importantly, the MAC MUST be collision resistant and hash-based. This ensures the ciphertext is a commitment of the key and message.
+Importantly, the MAC MUST be collision resistant and hash-based. This ensures the ciphertext is a commitment of all of the inputs, corresponding to security notion CMT-4 {{BH22}}. This provides the best security and ease of use by default.
 
 ## Authenticated Encryption
 
