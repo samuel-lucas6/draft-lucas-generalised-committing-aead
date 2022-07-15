@@ -1265,13 +1265,13 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
 <p id="section-2-4">Internals:<a href="#section-2-4" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-2-5.1">
-          <code>ENCRYPTION_CONTEXT</code>: "Cipher.Encrypt()", replacing "Cipher" with the properly capitalised and punctuated name of the cipher being used. For example, "ChaCha20.Encrypt()" or "AES-CTR.Encrypt()".<a href="#section-2-5.1" class="pilcrow">¶</a>
+          <code>T_LEN</code>: the authentication tag length, which <span class="bcp14">MUST</span> be 32 octets (256 bits).<a href="#section-2-5.1" class="pilcrow">¶</a>
 </li>
         <li class="normal" id="section-2-5.2">
-          <code>MAC_CONTEXT</code>: "MAC.KeyedHash()", replacing "MAC" with the properly capitalised and punctuated name of the collision-resistant, hash-based MAC being used. For example, "BLAKE2b.KeyedHash()" or "HMAC-SHA256.KeyedHash()".<a href="#section-2-5.2" class="pilcrow">¶</a>
+          <code>ENCRYPTION_CONTEXT</code>: "Cipher.Encrypt()", replacing "Cipher" with the properly capitalised and punctuated name of the cipher being used. For example, "ChaCha20.Encrypt()" or "AES-CTR.Encrypt()".<a href="#section-2-5.2" class="pilcrow">¶</a>
 </li>
         <li class="normal" id="section-2-5.3">
-          <code>T_LEN</code>: the authentication tag length, which <span class="bcp14">MUST</span> be 32 octets (256 bits).<a href="#section-2-5.3" class="pilcrow">¶</a>
+          <code>MAC_CONTEXT</code>: "MAC.KeyedHash()", replacing "MAC" with the properly capitalised and punctuated name of the collision-resistant, hash-based MAC being used. For example, "BLAKE2b.KeyedHash()" or "HMAC-SHA-256.KeyedHash()".<a href="#section-2-5.3" class="pilcrow">¶</a>
 </li>
       </ul>
 <p id="section-2-6">Inputs and outputs:<a href="#section-2-6" class="pilcrow">¶</a></p>
@@ -1451,13 +1451,13 @@ else
       <h2 id="name-security-considerations">
 <a href="#section-5" class="section-number selfRef">5. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
       </h2>
-<p id="section-5-1">The security of this generalised scheme depends on the unauthenticated cipher and collision-resistant, hash-based MAC used. For instance, ChaCha20 should provide 256-bit security against plaintext recovery, and HMAC-SHA256 should provide at least 128-bit security against forgery attacks. A 256-bit tag provides 128-bit security against collisions. This collision resistance should make it infeasible for a ciphertext to be decrypted under multiple keys.<a href="#section-5-1" class="pilcrow">¶</a></p>
+<p id="section-5-1">The security of this generalised scheme depends on the unauthenticated cipher and collision-resistant, hash-based MAC used. For instance, ChaCha20 should provide 256-bit security against plaintext recovery, and HMAC-SHA256 should provide at least 128-bit security against forgery attacks. A 256-bit tag provides 128-bit security against collisions. This collision resistance should make it infeasible for a ciphertext to be decrypted under multiple keys and for two messages to have the same tag.<a href="#section-5-1" class="pilcrow">¶</a></p>
 <p id="section-5-2">The nonce <span class="bcp14">MUST NOT</span> be repeated or reused for a given key. Doing so is catastrophic for security. For example, it results in identical keystreams with stream ciphers, which leaks the XOR of the plaintexts.<a href="#section-5-2" class="pilcrow">¶</a></p>
 <p id="section-5-3">The authentication tag comparison <span class="bcp14">MUST</span> be done in constant time to avoid leaking information via timing.<a href="#section-5-3" class="pilcrow">¶</a></p>
 <p id="section-5-4">If authentication fails, the ciphertext <span class="bcp14">MUST NOT</span> be decrypted internally, and the decrypted plaintext <span class="bcp14">MUST NOT</span> be given as output.<a href="#section-5-4" class="pilcrow">¶</a></p>
-<p id="section-5-5">The authentication tag <span class="bcp14">MUST NOT</span> be truncated as this would affect the collision resistance, which is needed for this scheme to be committing.<a href="#section-5-5" class="pilcrow">¶</a></p>
+<p id="section-5-5">The MAC output length <span class="bcp14">MUST NOT</span> be truncated below 256 bits as this would affect the collision resistance, which is needed for this scheme to be committing.<a href="#section-5-5" class="pilcrow">¶</a></p>
 <p id="section-5-6">Every key <span class="bcp14">MUST</span> be randomly chosen from a uniform distribution. Keys can either be randomly generated using a cryptographically secure pseudorandom number generator (CSPRNG) or the output of a key derivation function (KDF).<a href="#section-5-6" class="pilcrow">¶</a></p>
-<p id="section-5-7">The nonce <span class="bcp14">MAY</span> be public and/or predictable. It can be a counter, the output of a KDF by deriving a secret key alongside the nonce, or randomly generated using a CSPRNG. However, care <span class="bcp14">MUST</span> be taken to ensure that the likelihood of two randomly generated nonces colliding is low by frequently rotating the key being used.<a href="#section-5-7" class="pilcrow">¶</a></p>
+<p id="section-5-7">The nonce <span class="bcp14">MAY</span> be public and/or predictable. It can be a counter, the output of a KDF by deriving the key alongside the nonce, or randomly generated using a CSPRNG. However, care <span class="bcp14">MUST</span> be taken to ensure that the likelihood of two randomly generated nonces colliding is low by frequently rotating the key being used.<a href="#section-5-7" class="pilcrow">¶</a></p>
 <p id="section-5-8">The internally derived <code>encryptionKey</code> and <code>macKey</code> <span class="bcp14">SHOULD</span> be erased from memory before returning an output. However, this may not be possible in some programming languages.<a href="#section-5-8" class="pilcrow">¶</a></p>
 </section>
 </div>
