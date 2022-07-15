@@ -96,13 +96,13 @@ Table of Contents
    commitment of the encryption key and message.  This notion is
    fundamentally about collision resistance.
 
-   A limitation of many existing AEAD schemes, such as ChaCha20-Poly1305
-   [RFC8439], is that they are not key- or message-committing.  This
-   means it is possible for authentication to pass for multiple
-   different keys.  Thus, a ciphertext can be successfully decrypted to
-   different plaintexts [ADGKLS22].  Furthermore, an attacker who knows
-   the encryption key can find different messages that lead to the same
-   authentication tag.
+   A limitation of many existing AEAD schemes, such as AES-GCM [RFC5116]
+   and ChaCha20-Poly1305 [RFC8439], is that they are not key- or
+   message-committing.  This means it is possible for authentication to
+   pass for multiple different keys.  Thus, a ciphertext can be
+   successfully decrypted to different plaintexts [ADGKLS22].
+   Furthermore, an attacker who knows the encryption key can find
+   different messages that lead to the same authentication tag.
 
    This has led to practical attacks, such as the partitioning oracle
    attack [LGR21], which can allow an attacker to guess many encryption
