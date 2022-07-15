@@ -174,7 +174,7 @@ Table of Contents
    *  Encrypt(p, n, k): the unauthenticated encryption of plaintext p
       using nonce n and key k.
 
-   *  MAC(m, k, l): the l bits MAC of message m using key k.
+   *  MAC(m, k, l): the l-bit MAC of message m using key k.
 
    *  ConstantTimeEquals(a, b): the constant time comparison of a and b,
       which returns true if equal and false otherwise.
