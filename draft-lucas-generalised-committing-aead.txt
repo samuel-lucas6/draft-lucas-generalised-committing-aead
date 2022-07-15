@@ -4,8 +4,8 @@
 
 Network Working Group                                           S. Lucas
 Internet-Draft                                    Individual Contributor
-Intended status: Informational                              11 July 2022
-Expires: 12 January 2023
+Intended status: Informational                              15 July 2022
+Expires: 16 January 2023
 
 
               Encrypt-then-MAC for Committing AEAD (cAEAD)
@@ -41,7 +41,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 12 January 2023.
+   This Internet-Draft will expire on 16 January 2023.
 
 Copyright Notice
 
@@ -340,8 +340,8 @@ else
    The security of this generalised scheme depends on the
    unauthenticated cipher and collision-resistant, hash-based MAC used.
    For instance, ChaCha20 should provide 256-bit security against
-   plaintext recovery, and HMAC-SHA256 should provide 256-bit security
-   against forgery attacks.  A 256-bit tag provides 128-bit security
+   plaintext recovery, and HMAC-SHA256 should provide at least 128-bit
+   security against forgery.  A 256-bit tag provides 128-bit security
    against collisions.  This collision resistance should make it
    infeasible for a ciphertext to be decrypted under multiple keys.
 
