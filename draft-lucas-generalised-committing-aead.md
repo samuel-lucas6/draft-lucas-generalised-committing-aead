@@ -157,7 +157,7 @@ Operations:
 - `UTF8(s)`: the UTF8 encoding of string `s`.
 - `a.Slice(i, l)`: the copy of `l` bytes from `a`, starting at index `i`.
 - `Encrypt(p, n, k)`: the unauthenticated encryption of plaintext `p` using nonce `n` and key `k`.
-- `MAC(m, k, l)`: the `l` bits MAC of message `m` using key `k`.
+- `MAC(m, k, l)`: the `l`-bit MAC of message `m` using key `k`.
 - `ConstantTimeEquals(a, b)`: the constant time comparison of `a` and `b`, which returns `true` if equal and `false` otherwise.
 - `Decrypt(c, n, k)`: the unauthenticated decryption of ciphertext `c` without the appended tag using nonce `n` and key `k`.
 - `ZeroMemory(a)`: overwrite `a` with zeros in a way that is not optimised away by the compiler.
