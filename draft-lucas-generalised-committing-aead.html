@@ -1126,7 +1126,7 @@ svg :is([stroke="fill"], [fill^="#fff"]) {
             <p id="section-toc.1-1.2.1" class="keepWithNext"><a href="#section-2" class="xref">2</a>.  <a href="#name-conventions-and-definitions" class="xref">Conventions and Definitions</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3">
-            <p id="section-toc.1-1.3.1"><a href="#section-3" class="xref">3</a>.  <a href="#name-the-generalised-caead-const" class="xref">The Generalised cAEAD Construction</a></p>
+            <p id="section-toc.1-1.3.1"><a href="#section-3" class="xref">3</a>.  <a href="#name-the-generalised-caead-schem" class="xref">The Generalised cAEAD Scheme</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.1">
                 <p id="section-toc.1-1.3.2.1.1" class="keepWithNext"><a href="#section-3.1" class="xref">3.1</a>.  <a href="#name-authenticated-encryption" class="xref">Authenticated Encryption</a></p>
@@ -1244,7 +1244,7 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
           <code>UTF8(s)</code>: the UTF8 encoding of string <code>s</code>.<a href="#section-2-3.4" class="pilcrow">¶</a>
 </li>
         <li class="normal" id="section-2-3.5">
-          <code>a.Slice(i, l)</code>: the copy of <code>l</code> bytes from <code>a</code>, starting at index <code>i</code>.<a href="#section-2-3.5" class="pilcrow">¶</a>
+          <code>a.Slice(i, l)</code>: the copy of <code>l</code> octets from <code>a</code>, starting at index <code>i</code>.<a href="#section-2-3.5" class="pilcrow">¶</a>
 </li>
         <li class="normal" id="section-2-3.6">
           <code>Encrypt(p, n, k)</code>: the unauthenticated encryption of plaintext <code>p</code> using nonce <code>n</code> and key <code>k</code>.<a href="#section-2-3.6" class="pilcrow">¶</a>
@@ -1268,7 +1268,7 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
           <code>ENCRYPTION_CONTEXT</code>: "Cipher.Encrypt()", replacing "Cipher" with the properly capitalised and punctuated name of the cipher being used. For example, "ChaCha20.Encrypt()" or "AES-CTR.Encrypt()".<a href="#section-2-5.1" class="pilcrow">¶</a>
 </li>
         <li class="normal" id="section-2-5.2">
-          <code>MAC_CONTEXT</code>: "MAC.KeyedHash()", replacing "MAC" with the properly capitalised and punctuated name of the MAC being used. For example, "BLAKE2b.KeyedHash()" or "HMAC-SHA256.KeyedHash()".<a href="#section-2-5.2" class="pilcrow">¶</a>
+          <code>MAC_CONTEXT</code>: "MAC.KeyedHash()", replacing "MAC" with the properly capitalised and punctuated name of the collision-resistant, hash-based MAC being used. For example, "BLAKE2b.KeyedHash()" or "HMAC-SHA256.KeyedHash()".<a href="#section-2-5.2" class="pilcrow">¶</a>
 </li>
         <li class="normal" id="section-2-5.3">
           <code>T_LEN</code>: the authentication tag length, which <span class="bcp14">MUST</span> be 32 octets (256 bits).<a href="#section-2-5.3" class="pilcrow">¶</a>
@@ -1286,7 +1286,7 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
           <code>A_MAX</code>: 2<sup>64</sup>-1 octets.<a href="#section-2-7.3" class="pilcrow">¶</a>
 </li>
         <li class="normal" id="section-2-7.4">
-          <code>P_MAX</code>: 2<sup>64</sup>-1 octets unless the cipher being used requires a smaller plaintext to avoid the internal counter repeating or a collision being likely with a 50% probability. For example, 274,877,906,880 octets <span class="bcp14">MUST</span> be the maximum for ChaCha20 <span>[<a href="#RFC8439" class="xref">RFC8439</a>]</span>.<a href="#section-2-7.4" class="pilcrow">¶</a>
+          <code>P_MAX</code>: 2<sup>64</sup>-1 octets unless the cipher being used requires a smaller maximum plaintext length to avoid the internal counter repeating or a collision being likely with a 50% probability. For example, 274,877,906,880 octets <span class="bcp14">MUST</span> be the maximum for ChaCha20 <span>[<a href="#RFC8439" class="xref">RFC8439</a>]</span>.<a href="#section-2-7.4" class="pilcrow">¶</a>
 </li>
         <li class="normal" id="section-2-7.5">
           <code>C_MAX</code>: <code>P_MAX</code> + <code>T_LEN</code>.<a href="#section-2-7.5" class="pilcrow">¶</a>
@@ -1295,12 +1295,12 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
 <p id="section-2-8">The meanings of these parameters are defined in <span>[<a href="#RFC5116" class="xref">RFC5116</a>], <a href="https://rfc-editor.org/rfc/rfc5116#section-4" class="relref">Section 4</a></span>.<a href="#section-2-8" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="the-generalised-caead-construction">
+<div id="the-generalised-caead-scheme">
 <section id="section-3">
-      <h2 id="name-the-generalised-caead-const">
-<a href="#section-3" class="section-number selfRef">3. </a><a href="#name-the-generalised-caead-const" class="section-name selfRef">The Generalised cAEAD Construction</a>
+      <h2 id="name-the-generalised-caead-schem">
+<a href="#section-3" class="section-number selfRef">3. </a><a href="#name-the-generalised-caead-schem" class="section-name selfRef">The Generalised cAEAD Scheme</a>
       </h2>
-<p id="section-3-1">This construction combines two primitives:<a href="#section-3-1" class="pilcrow">¶</a></p>
+<p id="section-3-1">This scheme combines two primitives:<a href="#section-3-1" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-3-2">
 <li id="section-3-2.1">An unauthenticated stream cipher or block cipher.<a href="#section-3-2.1" class="pilcrow">¶</a>
 </li>
@@ -1325,16 +1325,16 @@ Encrypt(plaintext, nonce, key, associatedData)
             <code>plaintext</code>: the plaintext to be encrypted (length <span class="bcp14">MUST</span> be less than <code>P_MAX</code>).<a href="#section-3.1-4.1" class="pilcrow">¶</a>
 </li>
           <li class="normal" id="section-3.1-4.2">
-            <code>nonce</code>: the public nonce (length <span class="bcp14">MUST</span> be N_MIN).<a href="#section-3.1-4.2" class="pilcrow">¶</a>
+            <code>nonce</code>: the public nonce (length <span class="bcp14">MUST</span> be <code>N_MIN</code>).<a href="#section-3.1-4.2" class="pilcrow">¶</a>
 </li>
           <li class="normal" id="section-3.1-4.3">
-            <code>key</code>: the secret key (length <span class="bcp14">MUST</span> be K_LEN).<a href="#section-3.1-4.3" class="pilcrow">¶</a>
+            <code>key</code>: the secret key (length <span class="bcp14">MUST</span> be <code>K_LEN</code>).<a href="#section-3.1-4.3" class="pilcrow">¶</a>
 </li>
           <li class="normal" id="section-3.1-4.4">
             <code>associatedData</code>: the associated data to authenticate (length <span class="bcp14">MUST</span> be less than <code>A_MAX</code>).<a href="#section-3.1-4.4" class="pilcrow">¶</a>
 </li>
         </ul>
-<p id="section-3.1-5">Distinct associated data inputs, as described in <span>[<a href="#RFC5116" class="xref">RFC5116</a>], <a href="https://rfc-editor.org/rfc/rfc5116#section-3" class="relref">Section 3</a></span> will be unambiguously encoded as a single input. The application <span class="bcp14">MUST</span> create a structure in the associated data input if needed.<a href="#section-3.1-5" class="pilcrow">¶</a></p>
+<p id="section-3.1-5">Distinct associated data inputs, as described in <span>[<a href="#RFC5116" class="xref">RFC5116</a>], <a href="https://rfc-editor.org/rfc/rfc5116#section-3" class="relref">Section 3</a></span>, will be unambiguously encoded as a single input. The application <span class="bcp14">MUST</span> create a structure in the associated data input if needed.<a href="#section-3.1-5" class="pilcrow">¶</a></p>
 <p id="section-3.1-6">Outputs:<a href="#section-3.1-6" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-3.1-7.1">The ciphertext concatenated with the authentication tag or an error if the inputs do not meet the length criteria above.<a href="#section-3.1-7.1" class="pilcrow">¶</a>
@@ -1375,10 +1375,10 @@ Decrypt(ciphertext, nonce, key, associatedData)
             <code>ciphertext</code>: the ciphertext and appended tag to be authenticated and decrypted (length <span class="bcp14">MUST</span> be less than <code>C_MAX</code>).<a href="#section-3.2-4.1" class="pilcrow">¶</a>
 </li>
           <li class="normal" id="section-3.2-4.2">
-            <code>nonce</code>: the public nonce (length <span class="bcp14">MUST</span> be N_MIN).<a href="#section-3.2-4.2" class="pilcrow">¶</a>
+            <code>nonce</code>: the public nonce (length <span class="bcp14">MUST</span> be <code>N_MIN</code>).<a href="#section-3.2-4.2" class="pilcrow">¶</a>
 </li>
           <li class="normal" id="section-3.2-4.3">
-            <code>key</code>: the secret key (length <span class="bcp14">MUST</span> be K_LEN).<a href="#section-3.2-4.3" class="pilcrow">¶</a>
+            <code>key</code>: the secret key (length <span class="bcp14">MUST</span> be <code>K_LEN</code>).<a href="#section-3.2-4.3" class="pilcrow">¶</a>
 </li>
           <li class="normal" id="section-3.2-4.4">
             <code>associatedData</code>: the associated data to authenticate (length <span class="bcp14">MUST</span> be less than <code>A_MAX</code>).<a href="#section-3.2-4.4" class="pilcrow">¶</a>
@@ -1403,7 +1403,7 @@ computedTag = MAC(associatedData || ciphertextNoTag || LE64(associatedData.Lengt
 
 ZeroMemory(macKey)
 
-if (ConstantTimeEquals(tag, computedTag) == false)
+if (ConstantTimeEquals(tag, computedTag) is false)
     ZeroMemory(encryptionKey)
     return "authentication failed" error
 else
@@ -1422,28 +1422,28 @@ else
 <a href="#section-4" class="section-number selfRef">4. </a><a href="#name-chacha20-blake2b" class="section-name selfRef">ChaCha20-BLAKE2b</a>
       </h2>
 <p id="section-4-1">This algorithm is an instantiation of the generalised cAEAD scheme discussed above using ChaCha20 <span>[<a href="#RFC8439" class="xref">RFC8439</a>]</span> as the cipher and BLAKE2b <span>[<a href="#RFC7693" class="xref">RFC7693</a>]</span> as the MAC.<a href="#section-4-1" class="pilcrow">¶</a></p>
-<p id="section-4-2">The ChaCha20 specific input and output lengths are:<a href="#section-4-2" class="pilcrow">¶</a></p>
+<p id="section-4-2">The context strings are:<a href="#section-4-2" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-4-3.1">
-          <code>N_MIN</code>/<code>N_MAX</code>: 12 octets.<a href="#section-4-3.1" class="pilcrow">¶</a>
+          <code>ENCRYPTION_CONTEXT</code>: "ChaCha20.Encrypt()".<a href="#section-4-3.1" class="pilcrow">¶</a>
 </li>
         <li class="normal" id="section-4-3.2">
-          <code>P_MAX</code>: 2<sup>38</sup> octets.<a href="#section-4-3.2" class="pilcrow">¶</a>
-</li>
-        <li class="normal" id="section-4-3.3">
-          <code>C_MAX</code>: 2<sup>38</sup> + <code>T_LEN</code> octets.<a href="#section-4-3.3" class="pilcrow">¶</a>
+          <code>MAC_CONTEXT</code>: "BLAKE2b.KeyedHash()".<a href="#section-4-3.2" class="pilcrow">¶</a>
 </li>
       </ul>
-<p id="section-4-4">The rest of the lengths remain the same for all instantiations of this generalised cAEAD scheme.<a href="#section-4-4" class="pilcrow">¶</a></p>
-<p id="section-4-5">The context strings are:<a href="#section-4-5" class="pilcrow">¶</a></p>
+<p id="section-4-4">The ChaCha20 specific input and output lengths are:<a href="#section-4-4" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-4-6.1">
-          <code>ENCRYPTION_CONTEXT</code>: "ChaCha20.Encrypt()".<a href="#section-4-6.1" class="pilcrow">¶</a>
+<li class="normal" id="section-4-5.1">
+          <code>N_MIN</code>/<code>N_MAX</code>: 12 octets (96 bits).<a href="#section-4-5.1" class="pilcrow">¶</a>
 </li>
-        <li class="normal" id="section-4-6.2">
-          <code>MAC_CONTEXT</code>: "BLAKE2b.KeyedHash()".<a href="#section-4-6.2" class="pilcrow">¶</a>
+        <li class="normal" id="section-4-5.2">
+          <code>P_MAX</code>: 274,877,906,880 octets.<a href="#section-4-5.2" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-4-5.3">
+          <code>C_MAX</code>: <code>P_MAX</code> + <code>T_LEN</code> octets.<a href="#section-4-5.3" class="pilcrow">¶</a>
 </li>
       </ul>
+<p id="section-4-6">The rest of the lengths remain the same for all instantiations of this generalised cAEAD scheme.<a href="#section-4-6" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="security-considerations">
@@ -1451,7 +1451,7 @@ else
       <h2 id="name-security-considerations">
 <a href="#section-5" class="section-number selfRef">5. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
       </h2>
-<p id="section-5-1">The security of this generalised scheme depends on the unauthenticated cipher and collision-resistant, hash-based MAC used. For instance, ChaCha20 should provide 256-bit security against plaintext recovery, and HMAC-SHA256 should provide at least 128-bit security against forgery. A 256-bit tag provides 128-bit security against collisions. This collision resistance should make it infeasible for a ciphertext to be decrypted under multiple keys.<a href="#section-5-1" class="pilcrow">¶</a></p>
+<p id="section-5-1">The security of this generalised scheme depends on the unauthenticated cipher and collision-resistant, hash-based MAC used. For instance, ChaCha20 should provide 256-bit security against plaintext recovery, and HMAC-SHA256 should provide at least 128-bit security against forgery attacks. A 256-bit tag provides 128-bit security against collisions. This collision resistance should make it infeasible for a ciphertext to be decrypted under multiple keys.<a href="#section-5-1" class="pilcrow">¶</a></p>
 <p id="section-5-2">The nonce <span class="bcp14">MUST NOT</span> be repeated or reused for a given key. Doing so is catastrophic for security. For example, it results in identical keystreams with stream ciphers, which leaks the XOR of the plaintexts.<a href="#section-5-2" class="pilcrow">¶</a></p>
 <p id="section-5-3">The authentication tag comparison <span class="bcp14">MUST</span> be done in constant time to avoid leaking information via timing.<a href="#section-5-3" class="pilcrow">¶</a></p>
 <p id="section-5-4">If authentication fails, the ciphertext <span class="bcp14">MUST NOT</span> be decrypted internally, and the decrypted plaintext <span class="bcp14">MUST NOT</span> be given as output.<a href="#section-5-4" class="pilcrow">¶</a></p>
