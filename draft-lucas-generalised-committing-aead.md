@@ -164,9 +164,9 @@ Operations:
 
 Internals:
 
-- `ENCRYPTION_CONTEXT`: "Cipher.Encrypt()", replacing "Cipher" with the properly capitalised and punctuated name of the cipher being used. For example, "ChaCha20.Encrypt()" or "AES-CTR.Encrypt()".
-- `MAC_CONTEXT`: "MAC.KeyedHash()", replacing "MAC" with the properly capitalised and punctuated name of the collision-resistant, hash-based MAC being used. For example, "BLAKE2b.KeyedHash()" or "HMAC-SHA256.KeyedHash()".
 - `T_LEN`: the authentication tag length, which MUST be 32 octets (256 bits).
+- `ENCRYPTION_CONTEXT`: "Cipher.Encrypt()", replacing "Cipher" with the properly capitalised and punctuated name of the cipher being used. For example, "ChaCha20.Encrypt()" or "AES-CTR.Encrypt()".
+- `MAC_CONTEXT`: "MAC.KeyedHash()", replacing "MAC" with the properly capitalised and punctuated name of the collision-resistant, hash-based MAC being used. For example, "BLAKE2b.KeyedHash()" or "HMAC-SHA-256.KeyedHash()".
 
 Inputs and outputs:
 
@@ -285,7 +285,7 @@ The rest of the lengths remain the same for all instantiations of this generalis
 
 # Security Considerations
 
-The security of this generalised scheme depends on the unauthenticated cipher and collision-resistant, hash-based MAC used. For instance, ChaCha20 should provide 256-bit security against plaintext recovery, and HMAC-SHA256 should provide at least 128-bit security against forgery attacks. A 256-bit tag provides 128-bit security against collisions. This collision resistance should make it infeasible for a ciphertext to be decrypted under multiple keys.
+The security of this generalised scheme depends on the unauthenticated cipher and collision-resistant, hash-based MAC used. For instance, ChaCha20 should provide 256-bit security against plaintext recovery, and HMAC-SHA256 should provide at least 128-bit security against forgery attacks. A 256-bit tag provides 128-bit security against collisions. This collision resistance should make it infeasible for a ciphertext to be decrypted under multiple keys and for two messages to have the same tag.
 
 The nonce MUST NOT be repeated or reused for a given key. Doing so is catastrophic for security. For example, it results in identical keystreams with stream ciphers, which leaks the XOR of the plaintexts.
 
@@ -293,11 +293,11 @@ The authentication tag comparison MUST be done in constant time to avoid leaking
 
 If authentication fails, the ciphertext MUST NOT be decrypted internally, and the decrypted plaintext MUST NOT be given as output.
 
-The authentication tag MUST NOT be truncated as this would affect the collision resistance, which is needed for this scheme to be committing.
+The MAC output length MUST NOT be truncated below 256 bits as this would affect the collision resistance, which is needed for this scheme to be committing.
 
 Every key MUST be randomly chosen from a uniform distribution. Keys can either be randomly generated using a cryptographically secure pseudorandom number generator (CSPRNG) or the output of a key derivation function (KDF).
 
-The nonce MAY be public and/or predictable. It can be a counter, the output of a KDF by deriving a secret key alongside the nonce, or randomly generated using a CSPRNG. However, care MUST be taken to ensure that the likelihood of two randomly generated nonces colliding is low by frequently rotating the key being used.
+The nonce MAY be public and/or predictable. It can be a counter, the output of a KDF by deriving the key alongside the nonce, or randomly generated using a CSPRNG. However, care MUST be taken to ensure that the likelihood of two randomly generated nonces colliding is low by frequently rotating the key being used.
 
 The internally derived `encryptionKey` and `macKey` SHOULD be erased from memory before returning an output. However, this may not be possible in some programming languages.
 
