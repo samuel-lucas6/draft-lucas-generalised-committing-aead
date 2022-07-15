@@ -131,13 +131,15 @@ This document describes how to construct a committing authenticated encryption w
 
 # Introduction
 
-A limitation of many existing AEAD schemes, such as ChaCha20-Poly1305 {{!RFC8439}}, is that they are not key- or message-committing, which has been condensed to the phrase "committing" for this document. This means it is possible for authentication to pass for multiple different keys. Thus, a ciphertext can be successfully decrypted to different plaintexts {{ADGKLS22}}. An attacker who knows the key can also manipulate another party into believing they have been sent a certain message when they actually possess a different message.
+Authenticated encryption with associated data (AEAD) schemes provide confidentiality and authenticity. For a long time, these two properties have been considered sufficient for security. However, research has revealed that if an attacker can control which key is used for decryption, these properties are not enough. Instead, AEADs also need to be committing, meaning the ciphertext is a binding commitment of the encryption key and message. This notion is fundamentally about collision resistance.
+
+A limitation of many existing AEAD schemes, such as ChaCha20-Poly1305 {{!RFC8439}}, is that they are not key- or message-committing. This means it is possible for authentication to pass for multiple different keys. Thus, a ciphertext can be successfully decrypted to different plaintexts {{ADGKLS22}}. Furthermore, an attacker who knows the encryption key can find different messages that lead to the same authentication tag.
 
 This has led to practical attacks, such as the partitioning oracle attack {{LGR21}}, which can allow an attacker to guess many encryption passwords at once by repeatedly providing a ciphertext that successfully decrypts under different keys to an oracle (e.g. a server that knows the encryption key). Such a ciphertext that potentially decrypts under thousands of keys can be quickly computed by an attacker, although the complexity and scalability of attacks depends on the AEAD. This exploits a lack of key commitment and may be extendable to other online scenarios, such as discovering which public key is being used from a set of public keys.
 
 Another type of attack was demonstrated on Facebook Messenger's message franking scheme {{GLR17}}, which exploited a lack of message commitment. Due to end-to-end encryption, Facebook does not know a recipient's key. Therefore, when reporting a received message as abusive, the recipient must send their key for verification. However, a fake key could be used by the recipient to transform a harmless message from the sender into an abusive one.
 
-Whilst such attacks only apply in certain scenarios, developers intuitively expect an AEAD to have this commitment property, increasing the risk of falling prey to this type of protocol vulnerability. Certain suggested mitigations must be built into cryptographic libraries, developers may be unaware of mitigations they can do themselves, and some mitigations may leak information. For example, encrypting zeros in the first block may lead to timing differences during decryption, and prepending an unsalted hash of the key leaks its identity.
+Whilst such attacks only apply in certain scenarios, developers intuitively expect an AEAD to be committing, increasing the risk of falling prey to this type of protocol vulnerability. Certain suggested mitigations require changes to primitives and cryptographic libraries, developers may be unaware of mitigations they can do themselves, and some mitigations may leak information. For example, encrypting zeros in the first block may lead to timing differences during decryption, and prepending an unsalted hash of the key leaks its identity.
 
 However, Encrypt-then-MAC with the encryption key and authentication key derived from the same input keying material and a 256-bit or greater authentication tag from a collision-resistant, hash-based MAC is committing {{GLR17}}. Encrypt-then-MAC has been widely used (e.g. it forms the basis of ChaCha20-Poly1305), is well analysed {{BN00}}, can offer additional security against forgeries thanks to the larger tag, and can be more performant than some existing AEAD schemes under certain circumstances (e.g. depending on the MAC and size of the message).
 
@@ -451,6 +453,8 @@ associatedData: 76312e302e30
 
 # Acknowledgments
 {:numbered="false"}
+
+Thank you to Viet Tung Hoang, Julia Len, and Paul Grubbs for their excellent presentations on the topic of committing authenticated encryption.
 
 ChaCha20 and Poly1305 were designed by Daniel J. Bernstein.
 
