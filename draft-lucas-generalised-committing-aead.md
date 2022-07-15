@@ -155,7 +155,7 @@ Operations:
 - `a.Length`: the length of `a` in octets.
 - `LE64(x)`: the little-endian encoding of 64-bit unsigned integer `x`.
 - `UTF8(s)`: the UTF8 encoding of string `s`.
-- `a.Slice(i, l)`: the copy of `l` bytes from `a`, starting at index `i`.
+- `a.Slice(i, l)`: the copy of `l` octets from `a`, starting at index `i`.
 - `Encrypt(p, n, k)`: the unauthenticated encryption of plaintext `p` using nonce `n` and key `k`.
 - `MAC(m, k, l)`: the `l`-bit MAC of message `m` using key `k`.
 - `ConstantTimeEquals(a, b)`: the constant time comparison of `a` and `b`, which returns `true` if equal and `false` otherwise.
@@ -165,7 +165,7 @@ Operations:
 Internals:
 
 - `ENCRYPTION_CONTEXT`: "Cipher.Encrypt()", replacing "Cipher" with the properly capitalised and punctuated name of the cipher being used. For example, "ChaCha20.Encrypt()" or "AES-CTR.Encrypt()".
-- `MAC_CONTEXT`: "MAC.KeyedHash()", replacing "MAC" with the properly capitalised and punctuated name of the MAC being used. For example, "BLAKE2b.KeyedHash()" or "HMAC-SHA256.KeyedHash()".
+- `MAC_CONTEXT`: "MAC.KeyedHash()", replacing "MAC" with the properly capitalised and punctuated name of the collision-resistant, hash-based MAC being used. For example, "BLAKE2b.KeyedHash()" or "HMAC-SHA256.KeyedHash()".
 - `T_LEN`: the authentication tag length, which MUST be 32 octets (256 bits).
 
 Inputs and outputs:
@@ -173,14 +173,14 @@ Inputs and outputs:
 - `K_LEN`: the key length, which MUST be 32 octets (256 bits).
 - `N_MIN`/`N_MAX`: the nonce length, which MUST be the maximum nonce length supported by the cipher being used. For example, 12 octets (96 bits) for ChaCha20 {{!RFC8439}}.
 - `A_MAX`: 2<sup>64</sup>-1 octets.
-- `P_MAX`: 2<sup>64</sup>-1 octets unless the cipher being used requires a smaller plaintext to avoid the internal counter repeating or a collision being likely with a 50% probability. For example, 274,877,906,880 octets MUST be the maximum for ChaCha20 {{!RFC8439}}.
+- `P_MAX`: 2<sup>64</sup>-1 octets unless the cipher being used requires a smaller maximum plaintext length to avoid the internal counter repeating or a collision being likely with a 50% probability. For example, 274,877,906,880 octets MUST be the maximum for ChaCha20 {{!RFC8439}}.
 - `C_MAX`: `P_MAX` + `T_LEN`.
 
 The meanings of these parameters are defined in {{!RFC5116, Section 4}}.
 
-# The Generalised cAEAD Construction
+# The Generalised cAEAD Scheme
 
-This construction combines two primitives:
+This scheme combines two primitives:
 
 1. An unauthenticated stream cipher or block cipher.
 2. A collision-resistant keyed hash function or collision-resistant hash function used within HMAC {{!RFC2104}}.
@@ -198,11 +198,11 @@ The `Encrypt` function encrypts a plaintext message, authenticates the ciphertex
 Inputs:
 
 - `plaintext`: the plaintext to be encrypted (length MUST be less than `P_MAX`).
-- `nonce`: the public nonce (length MUST be N_MIN).
-- `key`: the secret key (length MUST be K_LEN).
+- `nonce`: the public nonce (length MUST be `N_MIN`).
+- `key`: the secret key (length MUST be `K_LEN`).
 - `associatedData`: the associated data to authenticate (length MUST be less than `A_MAX`).
 
-Distinct associated data inputs, as described in {{!RFC5116, Section 3}} will be unambiguously encoded as a single input. The application MUST create a structure in the associated data input if needed.
+Distinct associated data inputs, as described in {{!RFC5116, Section 3}}, will be unambiguously encoded as a single input. The application MUST create a structure in the associated data input if needed.
 
 Outputs:
 
@@ -235,8 +235,8 @@ The `Decrypt` function verifies that the authentication tag is correct for the g
 Inputs:
 
 - `ciphertext`: the ciphertext and appended tag to be authenticated and decrypted (length MUST be less than `C_MAX`).
-- `nonce`: the public nonce (length MUST be N_MIN).
-- `key`: the secret key (length MUST be K_LEN).
+- `nonce`: the public nonce (length MUST be `N_MIN`).
+- `key`: the secret key (length MUST be `K_LEN`).
 - `associatedData`: the associated data to authenticate (length MUST be less than `A_MAX`).
 
 Outputs:
@@ -257,7 +257,7 @@ computedTag = MAC(associatedData || ciphertextNoTag || LE64(associatedData.Lengt
 
 ZeroMemory(macKey)
 
-if (ConstantTimeEquals(tag, computedTag) == false)
+if (ConstantTimeEquals(tag, computedTag) is false)
     ZeroMemory(encryptionKey)
     return "authentication failed" error
 else
@@ -270,22 +270,22 @@ else
 
 This algorithm is an instantiation of the generalised cAEAD scheme discussed above using ChaCha20 {{!RFC8439}} as the cipher and BLAKE2b {{!RFC7693}} as the MAC.
 
-The ChaCha20 specific input and output lengths are:
-
-- `N_MIN`/`N_MAX`: 12 octets.
-- `P_MAX`: 2<sup>38</sup> octets.
-- `C_MAX`: 2<sup>38</sup> + `T_LEN` octets.
-
-The rest of the lengths remain the same for all instantiations of this generalised cAEAD scheme.
-
 The context strings are:
 
 - `ENCRYPTION_CONTEXT`: "ChaCha20.Encrypt()".
 - `MAC_CONTEXT`: "BLAKE2b.KeyedHash()".
 
+The ChaCha20 specific input and output lengths are:
+
+- `N_MIN`/`N_MAX`: 12 octets (96 bits).
+- `P_MAX`: 274,877,906,880 octets.
+- `C_MAX`: `P_MAX` + `T_LEN` octets.
+
+The rest of the lengths remain the same for all instantiations of this generalised cAEAD scheme.
+
 # Security Considerations
 
-The security of this generalised scheme depends on the unauthenticated cipher and collision-resistant, hash-based MAC used. For instance, ChaCha20 should provide 256-bit security against plaintext recovery, and HMAC-SHA256 should provide at least 128-bit security against forgery. A 256-bit tag provides 128-bit security against collisions. This collision resistance should make it infeasible for a ciphertext to be decrypted under multiple keys.
+The security of this generalised scheme depends on the unauthenticated cipher and collision-resistant, hash-based MAC used. For instance, ChaCha20 should provide 256-bit security against plaintext recovery, and HMAC-SHA256 should provide at least 128-bit security against forgery attacks. A 256-bit tag provides 128-bit security against collisions. This collision resistance should make it infeasible for a ciphertext to be decrypted under multiple keys.
 
 The nonce MUST NOT be repeated or reused for a given key. Doing so is catastrophic for security. For example, it results in identical keystreams with stream ciphers, which leaks the XOR of the plaintexts.
 
