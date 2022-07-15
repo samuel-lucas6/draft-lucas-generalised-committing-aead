@@ -87,14 +87,22 @@ Table of Contents
 
 1.  Introduction
 
+   Authenticated encryption with associated data (AEAD) schemes provide
+   confidentiality and authenticity.  For a long time, these two
+   properties have been considered sufficient for security.  However,
+   research has revealed that if an attacker can control which key is
+   used for decryption, these properties are not enough.  Instead, AEADs
+   also need to be committing, meaning the ciphertext is a binding
+   commitment of the encryption key and message.  This notion is
+   fundamentally about collision resistance.
+
    A limitation of many existing AEAD schemes, such as ChaCha20-Poly1305
-   [RFC8439], is that they are not key- or message-committing, which has
-   been condensed to the phrase "committing" for this document.  This
+   [RFC8439], is that they are not key- or message-committing.  This
    means it is possible for authentication to pass for multiple
    different keys.  Thus, a ciphertext can be successfully decrypted to
-   different plaintexts [ADGKLS22].  An attacker who knows the key can
-   also manipulate another party into believing they have been sent a
-   certain message when they actually possess a different message.
+   different plaintexts [ADGKLS22].  Furthermore, an attacker who knows
+   the encryption key can find different messages that lead to the same
+   authentication tag.
 
    This has led to practical attacks, such as the partitioning oracle
    attack [LGR21], which can allow an attacker to guess many encryption
@@ -116,14 +124,14 @@ Table of Contents
    harmless message from the sender into an abusive one.
 
    Whilst such attacks only apply in certain scenarios, developers
-   intuitively expect an AEAD to have this commitment property,
-   increasing the risk of falling prey to this type of protocol
-   vulnerability.  Certain suggested mitigations must be built into
-   cryptographic libraries, developers may be unaware of mitigations
-   they can do themselves, and some mitigations may leak information.
-   For example, encrypting zeros in the first block may lead to timing
-   differences during decryption, and prepending an unsalted hash of the
-   key leaks its identity.
+   intuitively expect an AEAD to be committing, increasing the risk of
+   falling prey to this type of protocol vulnerability.  Certain
+   suggested mitigations require changes to primitives and cryptographic
+   libraries, developers may be unaware of mitigations they can do
+   themselves, and some mitigations may leak information.  For example,
+   encrypting zeros in the first block may lead to timing differences
+   during decryption, and prepending an unsalted hash of the key leaks
+   its identity.
 
    However, Encrypt-then-MAC with the encryption key and authentication
    key derived from the same input keying material and a 256-bit or
@@ -570,6 +578,10 @@ key: 1002000000000000000000000000000000000000000000000000000000000000
 associatedData: 76312e302e30
 
 Acknowledgments
+
+   Thank you to Viet Tung Hoang, Julia Len, and Paul Grubbs for their
+   excellent presentations on the topic of committing authenticated
+   encryption.
 
    ChaCha20 and Poly1305 were designed by Daniel J.  Bernstein.
 
