@@ -201,7 +201,7 @@ Table of Contents
       output length and truncated output length MUST be specified.  For
       example, "BLAKE2b-256.KeyedHash()", "BLAKE2b-512-256.KeyedHash()"
       (truncated BLAKE2b-512), "HMAC-SHA-256.KeyedHash()", "HMAC-SHA-
-      512-256.KeyedHash()" (truncated HMAC-SHA-512), "HMAC-SHA-
+      512-256.KeyedHash()" (truncated HMAC-SHA-512), or "HMAC-SHA-
       512/256.KeyedHash()" (HMAC with the SHA-512/256 algorithm).
 
    Inputs and outputs:
