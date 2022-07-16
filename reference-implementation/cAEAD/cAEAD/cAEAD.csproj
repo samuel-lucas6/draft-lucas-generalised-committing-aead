@@ -7,9 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Reference Include="Sodium.Core">
-        <HintPath>Sodium.Core.dll</HintPath>
-      </Reference>
+      <PackageReference Include="Sodium.Core" Version="1.3.1" />
     </ItemGroup>
 
 </Project>

@@ -14,16 +14,11 @@
         <PackageReference Include="MSTest.TestAdapter" Version="2.2.8" />
         <PackageReference Include="MSTest.TestFramework" Version="2.2.8" />
         <PackageReference Include="coverlet.collector" Version="3.1.2" />
+        <PackageReference Include="Sodium.Core" Version="1.3.1" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\cAEAD\cAEAD.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Reference Include="Sodium.Core">
-        <HintPath>..\cAEAD\bin\Release\net6.0\Sodium.Core.dll</HintPath>
-      </Reference>
     </ItemGroup>
 
 </Project>
