@@ -4,8 +4,8 @@
 
 Network Working Group                                           S. Lucas
 Internet-Draft                                    Individual Contributor
-Intended status: Informational                              15 July 2022
-Expires: 16 January 2023
+Intended status: Informational                              16 July 2022
+Expires: 17 January 2023
 
 
               Encrypt-then-MAC for Committing AEAD (cAEAD)
@@ -41,7 +41,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 16 January 2023.
+   This Internet-Draft will expire on 17 January 2023.
 
 Copyright Notice
 
