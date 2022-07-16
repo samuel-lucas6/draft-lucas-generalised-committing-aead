@@ -166,7 +166,7 @@ Internals:
 
 - `T_LEN`: the authentication tag length, which MUST be 32 octets (256 bits).
 - `ENCRYPTION_CONTEXT`: "Cipher.Encrypt()", replacing "Cipher" with the properly capitalised and punctuated name of the cipher being used. For example, "ChaCha20.Encrypt()" or "AES-CTR.Encrypt()".
-- `MAC_CONTEXT`: "MAC.KeyedHash()", replacing "MAC" with the properly capitalised and punctuated name of the MAC being used, followed by "-" and the output length in bits if that is missing from the name. If the MAC output length is being truncated, both the full output length and truncated output length MUST be specified. For example, "BLAKE2b-256.KeyedHash()", "BLAKE2b-512-256.KeyedHash()" (truncated BLAKE2b-512), "HMAC-SHA-256.KeyedHash()", "HMAC-SHA-512-256.KeyedHash()" (truncated HMAC-SHA-512), "HMAC-SHA-512/256.KeyedHash()" (HMAC with the SHA-512/256 algorithm).
+- `MAC_CONTEXT`: "MAC.KeyedHash()", replacing "MAC" with the properly capitalised and punctuated name of the MAC being used, followed by "-" and the output length in bits if that is missing from the name. If the MAC output length is being truncated, both the full output length and truncated output length MUST be specified. For example, "BLAKE2b-256.KeyedHash()", "BLAKE2b-512-256.KeyedHash()" (truncated BLAKE2b-512), "HMAC-SHA-256.KeyedHash()", "HMAC-SHA-512-256.KeyedHash()" (truncated HMAC-SHA-512), or "HMAC-SHA-512/256.KeyedHash()" (HMAC with the SHA-512/256 algorithm).
 
 Inputs and outputs:
 
