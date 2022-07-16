@@ -1271,7 +1271,7 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
           <code>ENCRYPTION_CONTEXT</code>: "Cipher.Encrypt()", replacing "Cipher" with the properly capitalised and punctuated name of the cipher being used. For example, "ChaCha20.Encrypt()" or "AES-CTR.Encrypt()".<a href="#section-2-5.2" class="pilcrow">¶</a>
 </li>
         <li class="normal" id="section-2-5.3">
-          <code>MAC_CONTEXT</code>: "MAC.KeyedHash()", replacing "MAC" with the properly capitalised and punctuated name of the collision-resistant, hash-based MAC being used. For example, "BLAKE2b.KeyedHash()" or "HMAC-SHA-256.KeyedHash()".<a href="#section-2-5.3" class="pilcrow">¶</a>
+          <code>MAC_CONTEXT</code>: "MAC.KeyedHash()", replacing "MAC" with the properly capitalised and punctuated name of the MAC being used, followed by "-" and the output length in bits if that is missing from the name. If the MAC output length is being truncated, both the full output length and truncated output length <span class="bcp14">MUST</span> be specified. For example, "BLAKE2b-256.KeyedHash()", "BLAKE2b-512-256.KeyedHash()" (truncated BLAKE2b-512), "HMAC-SHA-256.KeyedHash()", "HMAC-SHA-512-256.KeyedHash()" (truncated HMAC-SHA-512), "HMAC-SHA-512/256.KeyedHash()" (HMAC with the SHA-512/256 algorithm).<a href="#section-2-5.3" class="pilcrow">¶</a>
 </li>
       </ul>
 <p id="section-2-6">Inputs and outputs:<a href="#section-2-6" class="pilcrow">¶</a></p>
@@ -1302,9 +1302,9 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
       </h2>
 <p id="section-3-1">This scheme combines two primitives:<a href="#section-3-1" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-3-2">
-<li id="section-3-2.1">An unauthenticated stream cipher or block cipher.<a href="#section-3-2.1" class="pilcrow">¶</a>
+<li id="section-3-2.1">An unauthenticated stream cipher or block cipher. The key size <span class="bcp14">MUST</span> be 256 bits.<a href="#section-3-2.1" class="pilcrow">¶</a>
 </li>
-        <li id="section-3-2.2">A collision-resistant keyed hash function or collision-resistant hash function used within HMAC <span>[<a href="#RFC2104" class="xref">RFC2104</a>]</span>.<a href="#section-3-2.2" class="pilcrow">¶</a>
+        <li id="section-3-2.2">A collision-resistant keyed hash function or collision-resistant hash function used within HMAC <span>[<a href="#RFC2104" class="xref">RFC2104</a>]</span>. The ouput length <span class="bcp14">MUST</span> be at least 256 bits and <span class="bcp14">MUST</span> be truncated to 256 bits if larger.<a href="#section-3-2.2" class="pilcrow">¶</a>
 </li>
       </ol>
 <p id="section-3-3">Importantly, the MAC <span class="bcp14">MUST</span> be hash-based and collision resistant. This ensures the ciphertext is a commitment of all the inputs, corresponding to security notion CMT-4 <span>[<a href="#BH22" class="xref">BH22</a>]</span>. This provides the best security and ease of use by default.<a href="#section-3-3" class="pilcrow">¶</a></p>
@@ -1428,7 +1428,7 @@ else
           <code>ENCRYPTION_CONTEXT</code>: "ChaCha20.Encrypt()".<a href="#section-4-3.1" class="pilcrow">¶</a>
 </li>
         <li class="normal" id="section-4-3.2">
-          <code>MAC_CONTEXT</code>: "BLAKE2b.KeyedHash()".<a href="#section-4-3.2" class="pilcrow">¶</a>
+          <code>MAC_CONTEXT</code>: "BLAKE2b-256.KeyedHash()".<a href="#section-4-3.2" class="pilcrow">¶</a>
 </li>
       </ul>
 <p id="section-4-4">The ChaCha20 specific input and output lengths are:<a href="#section-4-4" class="pilcrow">¶</a></p>
@@ -1455,7 +1455,7 @@ else
 <p id="section-5-2">The nonce <span class="bcp14">MUST NOT</span> be repeated or reused for a given key. Doing so is catastrophic for security. For example, it results in identical keystreams with stream ciphers, which leaks the XOR of the plaintexts.<a href="#section-5-2" class="pilcrow">¶</a></p>
 <p id="section-5-3">The authentication tag comparison <span class="bcp14">MUST</span> be done in constant time to avoid leaking information via timing.<a href="#section-5-3" class="pilcrow">¶</a></p>
 <p id="section-5-4">If authentication fails, the ciphertext <span class="bcp14">MUST NOT</span> be decrypted internally, and the decrypted plaintext <span class="bcp14">MUST NOT</span> be given as output.<a href="#section-5-4" class="pilcrow">¶</a></p>
-<p id="section-5-5">The MAC output length <span class="bcp14">MUST NOT</span> be truncated below 256 bits as this would affect the collision resistance, which is needed for this scheme to be committing.<a href="#section-5-5" class="pilcrow">¶</a></p>
+<p id="section-5-5">A larger MAC output length (e.g. 512 bits) that gets truncated to 256 bits <span class="bcp14">MAY</span> be used as long as the <code>MAC_CONTEXT</code> string is specified as instructed. However, the MAC output length <span class="bcp14">MUST NOT</span> be less than or truncated below 256 bits as this would affect the collision resistance, which is needed for this scheme to be committing.<a href="#section-5-5" class="pilcrow">¶</a></p>
 <p id="section-5-6">Every key <span class="bcp14">MUST</span> be randomly chosen from a uniform distribution. Keys can either be randomly generated using a cryptographically secure pseudorandom number generator (CSPRNG) or the output of a key derivation function (KDF).<a href="#section-5-6" class="pilcrow">¶</a></p>
 <p id="section-5-7">The nonce <span class="bcp14">MAY</span> be public and/or predictable. It can be a counter, the output of a KDF by deriving the key alongside the nonce, or randomly generated using a CSPRNG. However, care <span class="bcp14">MUST</span> be taken to ensure that the likelihood of two randomly generated nonces colliding is low by frequently rotating the key being used.<a href="#section-5-7" class="pilcrow">¶</a></p>
 <p id="section-5-8">The internally derived <code>encryptionKey</code> and <code>macKey</code> <span class="bcp14">SHOULD</span> be erased from memory before returning an output. However, this may not be possible in some programming languages.<a href="#section-5-8" class="pilcrow">¶</a></p>
@@ -1557,7 +1557,7 @@ key: 1001000000000000000000000000000000000000000000000000000000000000
 
 associatedData:
 
-ciphertext: 18337327ef02753bf8d996db218a3697c18943ea6efc86a7e449cb67a7592b9e1715a07771797c93789350528e2e7a8d25b4ca7a7d2968776d50577946cb5da693f1e09309236b7b7495a49a834611b4e67e02d5b24b8a538010ed6c43c30d0f172afe807c064855
+ciphertext: 18337327ef02753bf8d996db218a3697c18943ea6efc86a7e449cb67a7592b9e1715a07771797c93789350528e2e7a8d25b4ca7a7d2968776d50577946cb5da693f1e09309236b7bdb04001a8feeab7de48946f08df1cfd0ce03a719232ea7106efb8706e40d7cb6
 </pre><a href="#appendix-A.1.1-1" class="pilcrow">¶</a>
 </div>
 </section>
@@ -1577,7 +1577,7 @@ key: 1001000000000000000000000000000000000000000000000000000000000000
 
 associatedData:
 
-ciphertext: d4ad4bb5a97e0cf9eae5b695ee8f2c3e040241372a28c407abe1fe9accf94d04
+ciphertext: a1ad6c7c4a9bb8201cf72904ebea1fed709c75ded85adaea7034bdbba1b5ec4f
 </pre><a href="#appendix-A.1.2-1" class="pilcrow">¶</a>
 </div>
 </section>
@@ -1597,7 +1597,7 @@ key: 1001000000000000000000000000000000000000000000000000000000000000
 
 associatedData: 76312e302e30
 
-ciphertext: e048f6d38e774c50e143d422d6d6bf0c970d161aaa32f80145c63e876b470f86
+ciphertext: c0deb4501fe4cc651687cff8c9f5377072d4788cfe2d0f51dd97fab7b16fab84
 </pre><a href="#appendix-A.1.3-1" class="pilcrow">¶</a>
 </div>
 </section>
@@ -1617,7 +1617,7 @@ key: 1001000000000000000000000000000000000000000000000000000000000000
 
 associatedData:
 
-ciphertext: db685e0ff12fafd611a832c90e6c7905598ed65babdf6d8cf7057d07b5168673727dda3ef3d6ed2520332c8036e2ce0f72c413290bc4ae41d2d398e4cb2d1f6e906e232ae471ca0e6c12488063dd83b2b45b85d0e9919c420cb64b01a0b49e7189fc3c14e606ac8b
+ciphertext: db685e0ff12fafd611a832c90e6c7905598ed65babdf6d8cf7057d07b5168673727dda3ef3d6ed2520332c8036e2ce0f72c413290bc4ae41d2d398e4cb2d1f6e906e232ae471ca0ea4ade513d685a4fab9a886fa885b6f6b54ff04d66612cfdde669bd0dbda23f54
 </pre><a href="#appendix-A.1.4-1" class="pilcrow">¶</a>
 </div>
 </section>
@@ -1637,7 +1637,7 @@ key: 1002000000000000000000000000000000000000000000000000000000000000
 
 associatedData:
 
-ciphertext: 308319762a72faf302e6d34c2f882c27addc1b2130549e55a084bcdc189c2da0497fdbab20989f24a25f2d3934ac825caaf46ec61a853a06eb97b14c2ced147b94c2223506862d32e183e771eb4a3a03c1875934176577066552fffac50022b3925b9640b4c2d578
+ciphertext: 308319762a72faf302e6d34c2f882c27addc1b2130549e55a084bcdc189c2da0497fdbab20989f24a25f2d3934ac825caaf46ec61a853a06eb97b14c2ced147b94c2223506862d32af0be2b1f658597412e65d77560844eee38a190063300c8e8a8c62ea25b943b3
 </pre><a href="#appendix-A.1.5-1" class="pilcrow">¶</a>
 </div>
 </section>
@@ -1650,7 +1650,7 @@ ciphertext: 308319762a72faf302e6d34c2f882c27addc1b2130549e55a084bcdc189c2da0497f
 <p id="appendix-A.1.6-1">This test <span class="bcp14">MUST</span> return an "authentication failed" error.<a href="#appendix-A.1.6-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="appendix-A.1.6-2">
 <pre>
-ciphertext: 408319762a72faf302e6d34c2f882c27addc1b2130549e55a084bcdc189c2da0497fdbab20989f24a25f2d3934ac825caaf46ec61a853a06eb97b14c2ced147b94c2223506862d32e183e771eb4a3a03c1875934176577066552fffac50022b3925b9640b4c2d578
+ciphertext: 408319762a72faf302e6d34c2f882c27addc1b2130549e55a084bcdc189c2da0497fdbab20989f24a25f2d3934ac825caaf46ec61a853a06eb97b14c2ced147b94c2223506862d32af0be2b1f658597412e65d77560844eee38a190063300c8e8a8c62ea25b943b3
 
 nonce: 000000000000000000000000
 
@@ -1669,7 +1669,7 @@ associatedData:
 <p id="appendix-A.1.7-1">This test <span class="bcp14">MUST</span> return an "authentication failed" error.<a href="#appendix-A.1.7-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="appendix-A.1.7-2">
 <pre>
-ciphertext: 308319762a72faf302e6d34c2f882c27addc1b2130549e55a084bcdc189c2da0497fdbab20989f24a25f2d3934ac825caaf46ec61a853a06eb97b14c2ced147b94c2223506862d32e183e771eb4a3a03c1875934176577066552fffac50022b3925b9640b4c2d579
+ciphertext: 308319762a72faf302e6d34c2f882c27addc1b2130549e55a084bcdc189c2da0497fdbab20989f24a25f2d3934ac825caaf46ec61a853a06eb97b14c2ced147b94c2223506862d32af0be2b1f658597412e65d77560844eee38a190063300c8e8a8c62ea25b943b4
 
 nonce: 000000000000000000000000
 
@@ -1688,7 +1688,7 @@ associatedData:
 <p id="appendix-A.1.8-1">This test <span class="bcp14">MUST</span> return an "authentication failed" error.<a href="#appendix-A.1.8-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="appendix-A.1.8-2">
 <pre>
-ciphertext: 308319762a72faf302e6d34c2f882c27addc1b2130549e55a084bcdc189c2da0497fdbab20989f24a25f2d3934ac825caaf46ec61a853a06eb97b14c2ced147b94c2223506862d32e183e771eb4a3a03c1875934176577066552fffac50022b3925b9640b4c2d578
+ciphertext: 308319762a72faf302e6d34c2f882c27addc1b2130549e55a084bcdc189c2da0497fdbab20989f24a25f2d3934ac825caaf46ec61a853a06eb97b14c2ced147b94c2223506862d32af0be2b1f658597412e65d77560844eee38a190063300c8e8a8c62ea25b943b3
 
 nonce: 000000000000000000000001
 
@@ -1707,7 +1707,7 @@ associatedData:
 <p id="appendix-A.1.9-1">This test <span class="bcp14">MUST</span> return an "authentication failed" error.<a href="#appendix-A.1.9-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="appendix-A.1.9-2">
 <pre>
-ciphertext: 308319762a72faf302e6d34c2f882c27addc1b2130549e55a084bcdc189c2da0497fdbab20989f24a25f2d3934ac825caaf46ec61a853a06eb97b14c2ced147b94c2223506862d32e183e771eb4a3a03c1875934176577066552fffac50022b3925b9640b4c2d578
+ciphertext: 308319762a72faf302e6d34c2f882c27addc1b2130549e55a084bcdc189c2da0497fdbab20989f24a25f2d3934ac825caaf46ec61a853a06eb97b14c2ced147b94c2223506862d32af0be2b1f658597412e65d77560844eee38a190063300c8e8a8c62ea25b943b3
 
 nonce: 000000000000000000000000
 
@@ -1726,7 +1726,7 @@ associatedData:
 <p id="appendix-A.1.10-1">This test <span class="bcp14">MUST</span> return an "authentication failed" error.<a href="#appendix-A.1.10-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="appendix-A.1.10-2">
 <pre>
-ciphertext: 308319762a72faf302e6d34c2f882c27addc1b2130549e55a084bcdc189c2da0497fdbab20989f24a25f2d3934ac825caaf46ec61a853a06eb97b14c2ced147b94c2223506862d32e183e771eb4a3a03c1875934176577066552fffac50022b3925b9640b4c2d578
+ciphertext: 308319762a72faf302e6d34c2f882c27addc1b2130549e55a084bcdc189c2da0497fdbab20989f24a25f2d3934ac825caaf46ec61a853a06eb97b14c2ced147b94c2223506862d32af0be2b1f658597412e65d77560844eee38a190063300c8e8a8c62ea25b943b3
 
 nonce: 000000000000000000000000
 
