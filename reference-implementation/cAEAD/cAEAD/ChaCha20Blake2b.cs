@@ -6,8 +6,8 @@ namespace cAEAD;
 
 // This reference implementation is using libsodium as the cryptographic library for ChaCha20 and BLAKE2b
 // ChaCha20Ietf refers to the unauthenticated ChaCha20 from RFC 8439
-// GenericHash refers to keyed BLAKE2b from RFC 7693
-public static class ChaCha20Blake2b
+// GenericHash refers to keyed BLAKE2b-256 from RFC 7693
+public static class ChaCha20BLAKE2b
 {
     // Constants no matter the cipher and collision resistant, hash-based MAC
     // C# arrays cannot be greater than int.MaxValue by default
@@ -20,7 +20,7 @@ public static class ChaCha20Blake2b
     private const int P_MAX = int.MaxValue - T_LEN;
     private const int C_MAX = P_MAX + T_LEN;
     private const string ENCRYPTION_CONTEXT = "ChaCha20.Encrypt()";
-    private const string MAC_CONTEXT = "BLAKE2b.KeyedHash()";
+    private const string MAC_CONTEXT = "BLAKE2b-256.KeyedHash()";
 
     public static byte[] Encrypt(byte[] plaintext, byte[] nonce, byte[] key, byte[]? associatedData = null)
     {
@@ -67,9 +67,10 @@ public static class ChaCha20Blake2b
             CryptographicOperations.ZeroMemory(encryptionKey);
             throw new CryptographicException("Authentication failed.");
         }
-        byte[] plaintext = StreamEncryption.DecryptChaCha20Ietf(ciphertextNoTag, nonce, encryptionKey);
+        // Overwriting the ciphertext with the plaintext to avoid creating another array
+        ciphertextNoTag = StreamEncryption.DecryptChaCha20Ietf(ciphertextNoTag, nonce, encryptionKey);
         CryptographicOperations.ZeroMemory(encryptionKey);
-        return plaintext;
+        return ciphertextNoTag;
     }
 
     private static (byte[] encryptionKey, byte[] macKey) DeriveKeys(byte[] key, byte[] nonce)
