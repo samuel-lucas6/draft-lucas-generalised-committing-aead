@@ -166,7 +166,7 @@ Internals:
 
 - `T_LEN`: the authentication tag length, which MUST be 32 octets (256 bits).
 - `ENCRYPTION_CONTEXT`: "Cipher.Encrypt()", replacing "Cipher" with the properly capitalised and punctuated name of the cipher being used. For example, "ChaCha20.Encrypt()" or "AES-CTR.Encrypt()".
-- `MAC_CONTEXT`: "MAC.KeyedHash()", replacing "MAC" with the properly capitalised and punctuated name of the collision-resistant, hash-based MAC being used. For example, "BLAKE2b.KeyedHash()" or "HMAC-SHA-256.KeyedHash()".
+- `MAC_CONTEXT`: "MAC.KeyedHash()", replacing "MAC" with the properly capitalised and punctuated name of the MAC being used, followed by "-" and the output length in bits if that is missing from the name. If the MAC output length is being truncated, both the full output length and truncated output length MUST be specified. For example, "BLAKE2b-256.KeyedHash()", "BLAKE2b-512-256.KeyedHash()" (truncated BLAKE2b-512), "HMAC-SHA-256.KeyedHash()", "HMAC-SHA-512-256.KeyedHash()" (truncated HMAC-SHA-512), "HMAC-SHA-512/256.KeyedHash()" (HMAC with the SHA-512/256 algorithm).
 
 Inputs and outputs:
 
@@ -182,8 +182,8 @@ The meanings of these parameters are defined in {{!RFC5116, Section 4}}.
 
 This scheme combines two primitives:
 
-1. An unauthenticated stream cipher or block cipher.
-2. A collision-resistant keyed hash function or collision-resistant hash function used within HMAC {{!RFC2104}}.
+1. An unauthenticated stream cipher or block cipher. The key size MUST be 256 bits.
+2. A collision-resistant keyed hash function or collision-resistant hash function used within HMAC {{!RFC2104}}. The ouput length MUST be at least 256 bits and MUST be truncated to 256 bits if larger.
 
 Importantly, the MAC MUST be hash-based and collision resistant. This ensures the ciphertext is a commitment of all the inputs, corresponding to security notion CMT-4 {{BH22}}. This provides the best security and ease of use by default.
 
@@ -273,7 +273,7 @@ This algorithm is an instantiation of the generalised cAEAD scheme discussed abo
 The context strings are:
 
 - `ENCRYPTION_CONTEXT`: "ChaCha20.Encrypt()".
-- `MAC_CONTEXT`: "BLAKE2b.KeyedHash()".
+- `MAC_CONTEXT`: "BLAKE2b-256.KeyedHash()".
 
 The ChaCha20 specific input and output lengths are:
 
@@ -293,7 +293,7 @@ The authentication tag comparison MUST be done in constant time to avoid leaking
 
 If authentication fails, the ciphertext MUST NOT be decrypted internally, and the decrypted plaintext MUST NOT be given as output.
 
-The MAC output length MUST NOT be truncated below 256 bits as this would affect the collision resistance, which is needed for this scheme to be committing.
+A larger MAC output length (e.g. 512 bits) that gets truncated to 256 bits MAY be used as long as the `MAC_CONTEXT` string is specified as instructed. However, the MAC output length MUST NOT be less than or truncated below 256 bits as this would affect the collision resistance, which is needed for this scheme to be committing.
 
 Every key MUST be randomly chosen from a uniform distribution. Keys can either be randomly generated using a cryptographically secure pseudorandom number generator (CSPRNG) or the output of a key derivation function (KDF).
 
@@ -322,7 +322,7 @@ key: 1001000000000000000000000000000000000000000000000000000000000000
 
 associatedData:
 
-ciphertext: 18337327ef02753bf8d996db218a3697c18943ea6efc86a7e449cb67a7592b9e1715a07771797c93789350528e2e7a8d25b4ca7a7d2968776d50577946cb5da693f1e09309236b7b7495a49a834611b4e67e02d5b24b8a538010ed6c43c30d0f172afe807c064855
+ciphertext: 18337327ef02753bf8d996db218a3697c18943ea6efc86a7e449cb67a7592b9e1715a07771797c93789350528e2e7a8d25b4ca7a7d2968776d50577946cb5da693f1e09309236b7bdb04001a8feeab7de48946f08df1cfd0ce03a719232ea7106efb8706e40d7cb6
 ~~~
 
 ### Test Vector 2
@@ -336,7 +336,7 @@ key: 1001000000000000000000000000000000000000000000000000000000000000
 
 associatedData:
 
-ciphertext: d4ad4bb5a97e0cf9eae5b695ee8f2c3e040241372a28c407abe1fe9accf94d04
+ciphertext: a1ad6c7c4a9bb8201cf72904ebea1fed709c75ded85adaea7034bdbba1b5ec4f
 ~~~
 
 ### Test Vector 3
@@ -350,7 +350,7 @@ key: 1001000000000000000000000000000000000000000000000000000000000000
 
 associatedData: 76312e302e30
 
-ciphertext: e048f6d38e774c50e143d422d6d6bf0c970d161aaa32f80145c63e876b470f86
+ciphertext: c0deb4501fe4cc651687cff8c9f5377072d4788cfe2d0f51dd97fab7b16fab84
 ~~~
 
 ### Test Vector 4
@@ -364,7 +364,7 @@ key: 1001000000000000000000000000000000000000000000000000000000000000
 
 associatedData:
 
-ciphertext: db685e0ff12fafd611a832c90e6c7905598ed65babdf6d8cf7057d07b5168673727dda3ef3d6ed2520332c8036e2ce0f72c413290bc4ae41d2d398e4cb2d1f6e906e232ae471ca0e6c12488063dd83b2b45b85d0e9919c420cb64b01a0b49e7189fc3c14e606ac8b
+ciphertext: db685e0ff12fafd611a832c90e6c7905598ed65babdf6d8cf7057d07b5168673727dda3ef3d6ed2520332c8036e2ce0f72c413290bc4ae41d2d398e4cb2d1f6e906e232ae471ca0ea4ade513d685a4fab9a886fa885b6f6b54ff04d66612cfdde669bd0dbda23f54
 ~~~
 
 ### Test Vector 5
@@ -378,7 +378,7 @@ key: 1002000000000000000000000000000000000000000000000000000000000000
 
 associatedData:
 
-ciphertext: 308319762a72faf302e6d34c2f882c27addc1b2130549e55a084bcdc189c2da0497fdbab20989f24a25f2d3934ac825caaf46ec61a853a06eb97b14c2ced147b94c2223506862d32e183e771eb4a3a03c1875934176577066552fffac50022b3925b9640b4c2d578
+ciphertext: 308319762a72faf302e6d34c2f882c27addc1b2130549e55a084bcdc189c2da0497fdbab20989f24a25f2d3934ac825caaf46ec61a853a06eb97b14c2ced147b94c2223506862d32af0be2b1f658597412e65d77560844eee38a190063300c8e8a8c62ea25b943b3
 ~~~
 
 ### Test Vector 6
@@ -386,7 +386,7 @@ ciphertext: 308319762a72faf302e6d34c2f882c27addc1b2130549e55a084bcdc189c2da0497f
 This test MUST return an "authentication failed" error.
 
 ~~~
-ciphertext: 408319762a72faf302e6d34c2f882c27addc1b2130549e55a084bcdc189c2da0497fdbab20989f24a25f2d3934ac825caaf46ec61a853a06eb97b14c2ced147b94c2223506862d32e183e771eb4a3a03c1875934176577066552fffac50022b3925b9640b4c2d578
+ciphertext: 408319762a72faf302e6d34c2f882c27addc1b2130549e55a084bcdc189c2da0497fdbab20989f24a25f2d3934ac825caaf46ec61a853a06eb97b14c2ced147b94c2223506862d32af0be2b1f658597412e65d77560844eee38a190063300c8e8a8c62ea25b943b3
 
 nonce: 000000000000000000000000
 
@@ -400,7 +400,7 @@ associatedData:
 This test MUST return an "authentication failed" error.
 
 ~~~
-ciphertext: 308319762a72faf302e6d34c2f882c27addc1b2130549e55a084bcdc189c2da0497fdbab20989f24a25f2d3934ac825caaf46ec61a853a06eb97b14c2ced147b94c2223506862d32e183e771eb4a3a03c1875934176577066552fffac50022b3925b9640b4c2d579
+ciphertext: 308319762a72faf302e6d34c2f882c27addc1b2130549e55a084bcdc189c2da0497fdbab20989f24a25f2d3934ac825caaf46ec61a853a06eb97b14c2ced147b94c2223506862d32af0be2b1f658597412e65d77560844eee38a190063300c8e8a8c62ea25b943b4
 
 nonce: 000000000000000000000000
 
@@ -414,7 +414,7 @@ associatedData:
 This test MUST return an "authentication failed" error.
 
 ~~~
-ciphertext: 308319762a72faf302e6d34c2f882c27addc1b2130549e55a084bcdc189c2da0497fdbab20989f24a25f2d3934ac825caaf46ec61a853a06eb97b14c2ced147b94c2223506862d32e183e771eb4a3a03c1875934176577066552fffac50022b3925b9640b4c2d578
+ciphertext: 308319762a72faf302e6d34c2f882c27addc1b2130549e55a084bcdc189c2da0497fdbab20989f24a25f2d3934ac825caaf46ec61a853a06eb97b14c2ced147b94c2223506862d32af0be2b1f658597412e65d77560844eee38a190063300c8e8a8c62ea25b943b3
 
 nonce: 000000000000000000000001
 
@@ -428,7 +428,7 @@ associatedData:
 This test MUST return an "authentication failed" error.
 
 ~~~
-ciphertext: 308319762a72faf302e6d34c2f882c27addc1b2130549e55a084bcdc189c2da0497fdbab20989f24a25f2d3934ac825caaf46ec61a853a06eb97b14c2ced147b94c2223506862d32e183e771eb4a3a03c1875934176577066552fffac50022b3925b9640b4c2d578
+ciphertext: 308319762a72faf302e6d34c2f882c27addc1b2130549e55a084bcdc189c2da0497fdbab20989f24a25f2d3934ac825caaf46ec61a853a06eb97b14c2ced147b94c2223506862d32af0be2b1f658597412e65d77560844eee38a190063300c8e8a8c62ea25b943b3
 
 nonce: 000000000000000000000000
 
@@ -442,7 +442,7 @@ associatedData:
 This test MUST return an "authentication failed" error.
 
 ~~~
-ciphertext: 308319762a72faf302e6d34c2f882c27addc1b2130549e55a084bcdc189c2da0497fdbab20989f24a25f2d3934ac825caaf46ec61a853a06eb97b14c2ced147b94c2223506862d32e183e771eb4a3a03c1875934176577066552fffac50022b3925b9640b4c2d578
+ciphertext: 308319762a72faf302e6d34c2f882c27addc1b2130549e55a084bcdc189c2da0497fdbab20989f24a25f2d3934ac825caaf46ec61a853a06eb97b14c2ced147b94c2223506862d32af0be2b1f658597412e65d77560844eee38a190063300c8e8a8c62ea25b943b3
 
 nonce: 000000000000000000000000
 
