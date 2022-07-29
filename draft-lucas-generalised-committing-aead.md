@@ -131,7 +131,7 @@ This document describes how to construct a committing authenticated encryption w
 
 # Introduction
 
-Authenticated encryption with associated data (AEAD) schemes provide confidentiality and authenticity. For a long time, these two properties have been considered sufficient for security. However, research has revealed that if an attacker can control which key is used for decryption, these properties are not enough. Instead, AEADs also need to be committing, meaning the ciphertext is a binding commitment of the encryption key and message. This notion is fundamentally about collision resistance.
+Authenticated encryption with associated data (AEAD) schemes provide confidentiality and authenticity. For a long time, these two properties have been considered sufficient for security. However, research has revealed that if keys can be adversarial, these properties are not enough. Instead, AEADs also need to be committing, meaning the ciphertext is a binding commitment of the encryption key and message. This requires collision resistance.
 
 A limitation of many existing AEAD schemes, such as AES-GCM {{!RFC5116}} and ChaCha20-Poly1305 {{!RFC8439}}, is that they are not key- or message-committing. This means it is possible for authentication to pass for multiple different keys. Thus, a ciphertext can be successfully decrypted to different plaintexts {{ADGKLS22}}. Furthermore, an attacker who knows the encryption key can find different messages that lead to the same authentication tag.
 
