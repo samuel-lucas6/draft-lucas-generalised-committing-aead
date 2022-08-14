@@ -131,19 +131,19 @@ This document describes how to construct a committing authenticated encryption w
 
 # Introduction
 
-Authenticated encryption with associated data (AEAD) schemes provide confidentiality and authenticity. For a long time, these two properties have been considered sufficient for security. However, research has revealed that if keys can be adversarial, these properties are not enough. Instead, AEADs also need to be committing, meaning the ciphertext is a binding commitment of the encryption key and message. This requires collision resistance.
+Authenticated encryption with associated data (AEAD) schemes provide confidentiality and authenticity. However, research has revealed that if keys can be adversarial, these properties are not enough. Instead, AEADs also need to be committing, meaning the ciphertext is a binding commitment of the encryption key and message. This requires collision resistance.
 
-A limitation of many existing AEAD schemes, such as AES-GCM {{!RFC5116}} and ChaCha20-Poly1305 {{!RFC8439}}, is that they are not key- or message-committing. This means it is possible for authentication to pass for multiple different keys. Thus, a ciphertext can be successfully decrypted to different plaintexts {{ADGKLS22}}. Furthermore, an attacker who knows the encryption key can find different messages that lead to the same authentication tag.
+Unfortunately, many existing AEAD schemes, such as AES-GCM {{!RFC5116}} and ChaCha20-Poly1305 {{!RFC8439}}, are not key- nor message-committing. This means it is possible for authentication to pass for multiple different keys. Thus, a ciphertext can be successfully decrypted to different plaintexts {{ADGKLS22}}. Furthermore, an attacker who knows the encryption key can find different messages that lead to the same authentication tag.
 
-This has led to practical attacks, such as the partitioning oracle attack {{LGR21}}, which can allow an attacker to guess many encryption passwords at once by repeatedly providing a ciphertext that successfully decrypts under different keys to an oracle (e.g. a server that knows the encryption key). Such a ciphertext that potentially decrypts under thousands of keys can be quickly computed by an attacker, although the complexity and scalability of attacks depends on the AEAD. This exploits a lack of key commitment and may be extendable to other online scenarios, such as discovering which public key is being used from a set of public keys.
+This has led to practical attacks, such as the partitioning oracle attack {{LGR21}}, which can allow an attacker to guess many encryption passwords at once by repeatedly providing a ciphertext that successfully decrypts under different keys to an oracle (e.g. a server that knows the encryption key). Such a ciphertext that potentially decrypts under thousands of keys can be quickly computed by an attacker, although the complexity and scalability of attacks depends on the AEAD. This exploits a lack of key commitment.
 
 Another type of attack was demonstrated on Facebook Messenger's message franking scheme {{GLR17}}, which exploited a lack of message commitment. Due to end-to-end encryption, Facebook does not know a recipient's key. Therefore, when reporting a received message as abusive, the recipient must send their key for verification. However, a fake key could be used by the recipient to transform a harmless message from the sender into an abusive one.
 
-Whilst such attacks only apply in certain scenarios, developers intuitively expect an AEAD to be committing, increasing the risk of falling prey to this type of protocol vulnerability. Certain suggested mitigations require changes to primitives and cryptographic libraries, developers may be unaware of mitigations they can do themselves, and some mitigations may leak information. For example, encrypting zeros in the first block may lead to timing differences during decryption, and prepending an unsalted hash of the key leaks its identity.
+Whilst such attacks only apply in certain scenarios, developers intuitively expect an AEAD to be committing, increasing the risk of falling prey to this type of protocol vulnerability. Moreover, certain mitigations require changes to primitives and cryptographic libraries, and many naive mitigations may leak information. For example, the padding fix and generic UtC transform {{ADGKLS22}} may lead to timing differences during decryption, and prepending an unsalted hash of the key leaks its identity.
 
-However, Encrypt-then-MAC with the encryption key and authentication key derived from the same input keying material and a 256-bit or greater authentication tag from a collision-resistant, hash-based MAC is committing {{GLR17}}. Encrypt-then-MAC has been widely used (e.g. it forms the basis of ChaCha20-Poly1305), is well analysed {{BN00}}, can offer additional security against forgeries thanks to the larger tag, and can be more performant than some existing AEAD schemes under certain circumstances (e.g. depending on the MAC and size of the message).
+However, Encrypt-then-MAC with the encryption key and authentication key derived from the same input keying material and a 256-bit or greater authentication tag from a collision-resistant, hash-based MAC is committing {{GLR17}}. This combination has been widely used, well analysed {{BN00}}, provides additional security against forgeries, and can sometimes be more performant than some existing AEAD schemes.
 
-The partitioning oracle attack authors recommend using a committing AEAD (cAEAD) by default when non-committing AEAD vulnerabilities cannot be ruled out {{LGR21}}. Therefore, this document introduces a simple Encrypt-then-MAC cAEAD scheme that can be implemented using an unauthenticated cipher and collision-resistant, hash-based MAC from a cryptographic library. For instance, ChaCha20 {{!RFC8439}} and BLAKE2b {{!RFC7693}} could be used.
+The partitioning oracle attack authors recommend using a committing AEAD (cAEAD) by default when non-committing AEAD vulnerabilities cannot be ruled out {{LGR21}}. Therefore, this document introduces a simple Encrypt-then-MAC cAEAD scheme that can be implemented using an unauthenticated cipher and collision-resistant, hash-based MAC from a cryptographic library. For instance, ChaCha20 {{!RFC8439}} and BLAKE2b {{!RFC7693}}.
 
 # Conventions and Definitions
 
@@ -183,7 +183,7 @@ The meanings of these parameters are defined in {{!RFC5116, Section 4}}.
 This scheme combines two primitives:
 
 1. An unauthenticated stream cipher or block cipher. The key size MUST be 256 bits.
-2. A collision-resistant keyed hash function or collision-resistant hash function used within HMAC {{!RFC2104}}. The ouput length MUST be at least 256 bits and MUST be truncated to 256 bits if larger.
+2. A collision-resistant keyed hash function or collision-resistant hash function used within HMAC {{!RFC2104}}. The ouput length MUST be 256 bits or truncated to 256 bits.
 
 Importantly, the MAC MUST be hash-based and collision resistant. This ensures the ciphertext is a commitment of all the inputs, corresponding to security notion CMT-4 {{BH22}}. This provides the best security and ease of use by default.
 
@@ -291,13 +291,13 @@ The nonce MUST NOT be repeated or reused for a given key. Doing so is catastroph
 
 The authentication tag comparison MUST be done in constant time to avoid leaking information via timing.
 
-If authentication fails, the ciphertext MUST NOT be decrypted internally, and the decrypted plaintext MUST NOT be given as output.
+If authentication fails, the ciphertext MUST NOT be decrypted.
 
 A larger MAC output length (e.g. 512 bits) that gets truncated to 256 bits MAY be used as long as the `MAC_CONTEXT` string is specified as instructed. However, the MAC output length MUST NOT be less than or truncated below 256 bits as this would affect the collision resistance, which is needed for this scheme to be committing.
 
-Every key MUST be randomly chosen from a uniform distribution. Keys can either be randomly generated using a cryptographically secure pseudorandom number generator (CSPRNG) or the output of a key derivation function (KDF).
+Every key MUST be randomly chosen from a uniform distribution. This means randomly generated using a cryptographically secure pseudorandom number generator (CSPRNG) or the output of a key derivation function (KDF).
 
-The nonce MAY be public and/or predictable. It can be a counter, the output of a KDF by deriving the key alongside the nonce, or randomly generated using a CSPRNG. However, care MUST be taken to ensure that the likelihood of two randomly generated nonces colliding is low by frequently rotating the key being used.
+The nonce MAY be public and/or predictable. It can be a counter, the output of a KDF by deriving the nonce alongside the key, or randomly generated using a CSPRNG. However, care MUST be taken to ensure that the likelihood of two randomly generated nonces colliding is low by frequently rotating the key being used.
 
 The internally derived `encryptionKey` and `macKey` SHOULD be erased from memory before returning an output. However, this may not be possible in some programming languages.
 
