@@ -167,17 +167,17 @@ This document describes how to construct a committing authenticated encryption w
 
 # Introduction
 
-Authenticated encryption with associated data (AEAD) schemes provide confidentiality and authenticity. However, research has revealed that if keys can be adversarial, these properties are not enough. Instead, AEADs also need to be committing, meaning the ciphertext is a binding commitment of the encryption key and message. This requires collision resistance.
+Authenticated encryption with associated data (AEAD) schemes provide confidentiality and authenticity. However, research has revealed that if keys can be adversarial, these properties are not enough. Instead, AEADs also need to be committing, meaning the ciphertext is a binding commitment of all the AEAD inputs. This requires collision resistance {{BH22}}.
 
-Unfortunately, many existing AEAD schemes, such as AES-GCM {{GCM}} and ChaCha20-Poly1305 {{!RFC8439}}, are not key- nor message-committing. This means it is possible for authentication to pass for multiple different keys. Thus, a ciphertext can be successfully decrypted to different plaintexts {{ADGKLS22}}. Furthermore, an attacker who knows the encryption key can find different messages that lead to the same authentication tag.
+Unfortunately, many existing AEAD schemes, such as AES-GCM {{GCM}} and ChaCha20-Poly1305 {{!RFC8439}}, are not committing. This means it is possible for authentication to pass for multiple different keys. Thus, a ciphertext can be successfully decrypted to different plaintexts {{ADGKLS22}}. Furthermore, an attacker who knows the key can find different messages that lead to the same authentication tag.
 
-This has led to practical attacks, such as the partitioning oracle attack {{LGR21}}, which can allow an attacker to guess many encryption passwords at once by repeatedly providing a ciphertext that successfully decrypts under different keys to an oracle (e.g. a server that knows the encryption key). Such a ciphertext that potentially decrypts under thousands of keys can be quickly computed by an attacker, although the complexity and scalability of attacks depends on the AEAD. This exploits a lack of key commitment.
+This has led to practical attacks, such as the partitioning oracle attack {{LGR21}}, which can allow an attacker to guess many encryption passwords at once by repeatedly providing a ciphertext that successfully decrypts under different keys to an oracle (e.g. a server that knows the encryption key). Such a ciphertext that potentially decrypts under thousands of keys can quickly be computed by an attacker, although the complexity and scalability of attacks depends on the AEAD. This exploits a lack of key commitment.
 
 Another type of attack was demonstrated on Facebook Messenger's message franking scheme {{DGRW18}}, which exploited a lack of message commitment. Due to end-to-end encryption, Facebook does not know a recipient's key. Therefore, when reporting a received message as abusive, the recipient must send their key for verification. However, a fake key could be used by the recipient to transform a harmless message from the sender into an abusive one.
 
 Whilst such attacks only apply in certain scenarios, developers intuitively expect an AEAD to be committing, increasing the risk of falling prey to this type of protocol vulnerability. Moreover, certain mitigations require changes to primitives and cryptographic libraries, and many naive mitigations may leak information. For example, the padding fix and generic UtC transform {{ADGKLS22}} may lead to timing differences during decryption, and prepending an unsalted hash of the key leaks its identity.
 
-However, Encrypt-then-MAC with the encryption key and authentication key derived from the same input keying material and a 256-bit or greater authentication tag from a collision-resistant, hash-based MAC is committing {{GLR17}}. This combination has been widely used, well analysed {{BN00}}, provides additional security against forgeries, and can sometimes be more performant than some existing AEAD schemes.
+However, Encrypt-then-MAC with the encryption key and authentication key derived from the same input keying material and a 256-bit or greater authentication tag from a collision-resistant, hash-based MAC is committing {{GLR17}}. This combination has been widely used, well analysed {{BN00}}, provides additional security against forgeries, and can sometimes be more performant than certain existing AEAD schemes.
 
 The partitioning oracle attack authors recommend using a committing AEAD (cAEAD) by default when non-committing AEAD vulnerabilities cannot be ruled out {{LGR21}}. Therefore, this document introduces a simple Encrypt-then-MAC cAEAD scheme that can be implemented using an unauthenticated cipher and collision-resistant, hash-based MAC from a cryptographic library. For instance, ChaCha20 {{!RFC8439}} and BLAKE2b {{!RFC7693}}.
 
@@ -219,7 +219,7 @@ The meanings of these parameters are defined in {{!RFC5116, Section 4}}.
 This scheme combines two primitives:
 
 1. An unauthenticated stream cipher or block cipher. The key size MUST be 256 bits.
-2. A collision-resistant keyed hash function or collision-resistant hash function used within HMAC {{!RFC2104}}. The ouput length MUST be 256 bits or truncated to 256 bits.
+2. A collision-resistant keyed hash function or collision-resistant hash function used within HMAC {{!RFC2104}}. The output length MUST be 256 bits or truncated to 256 bits.
 
 Importantly, the MAC MUST be hash-based and collision resistant. This ensures the ciphertext is a commitment of all the inputs, corresponding to security notion CMT-4 {{BH22}}. This provides the best security and ease of use by default.
 
