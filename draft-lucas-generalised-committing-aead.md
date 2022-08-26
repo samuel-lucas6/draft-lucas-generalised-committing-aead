@@ -106,6 +106,17 @@ informative:
         org: Cornell Tech
     date: 2017
 
+  GCM:
+    title: "NIST Special Publication 800-38D: Recommendation for Block Cipher Modes of Operation: Galois/Counter Mode (GCM) and GMAC"
+    rc: "U.S. National Institute of Standards and Technology"
+    target: https://csrc.nist.gov/publications/nistpubs/800-38D/SP-800-38D.pdf
+    author:
+      -
+        ins: M. Dworkin
+        name: Morris Dworkin
+        org: NIST
+    date: November 2007
+
   BN00:
     title: "Authenticated encryption: Relations among notions and analysis of the generic composition paradigm"
     rc: "ASIACRYPT 2000. Lecture Notes in Computer Science, vol 1976, pp. 531-545"
@@ -133,7 +144,7 @@ This document describes how to construct a committing authenticated encryption w
 
 Authenticated encryption with associated data (AEAD) schemes provide confidentiality and authenticity. However, research has revealed that if keys can be adversarial, these properties are not enough. Instead, AEADs also need to be committing, meaning the ciphertext is a binding commitment of the encryption key and message. This requires collision resistance.
 
-Unfortunately, many existing AEAD schemes, such as AES-GCM {{!RFC5116}} and ChaCha20-Poly1305 {{!RFC8439}}, are not key- nor message-committing. This means it is possible for authentication to pass for multiple different keys. Thus, a ciphertext can be successfully decrypted to different plaintexts {{ADGKLS22}}. Furthermore, an attacker who knows the encryption key can find different messages that lead to the same authentication tag.
+Unfortunately, many existing AEAD schemes, such as AES-GCM {{GCM}} and ChaCha20-Poly1305 {{!RFC8439}}, are not key- nor message-committing. This means it is possible for authentication to pass for multiple different keys. Thus, a ciphertext can be successfully decrypted to different plaintexts {{ADGKLS22}}. Furthermore, an attacker who knows the encryption key can find different messages that lead to the same authentication tag.
 
 This has led to practical attacks, such as the partitioning oracle attack {{LGR21}}, which can allow an attacker to guess many encryption passwords at once by repeatedly providing a ciphertext that successfully decrypts under different keys to an oracle (e.g. a server that knows the encryption key). Such a ciphertext that potentially decrypts under thousands of keys can be quickly computed by an attacker, although the complexity and scalability of attacks depends on the AEAD. This exploits a lack of key commitment.
 
