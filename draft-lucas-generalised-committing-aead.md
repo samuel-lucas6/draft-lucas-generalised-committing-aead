@@ -85,6 +85,31 @@ informative:
         org: Cornell Tech
     date: 2021
 
+  DGRW18:
+    title: "Fast Message Franking: From Invisible Salamanders to Encryptment"
+    rc: "CRYPTO 2018. Lecture Notes in Computer Science, vol 10991, pp. 155-186"
+    target: https://eprint.iacr.org/2019/016.pdf
+    seriesinfo:
+      DOI: 10.1007/978-3-319-96884-1_6
+    author:
+      -
+        ins: Y. Dodis
+        name: Yevgeniy Dodis
+        org: New York University
+      -
+        ins: P. Grubbs
+        name: Paul Grubbs
+        org: Cornell Tech
+      -
+        ins: T. Ristenpart
+        name: Thomas Ristenpart
+        org: Cornell Tech
+      -
+        ins: J. Woodage
+        name: Joanne Woodage
+        org: Royal Holloway, University of London
+    date: 2018
+
   GLR17:
     title: "Message Franking via Committing Authenticated Encryption"
     rc: "CRYPTO 2017. Lecture Notes in Computer Science, vol 10403, pp. 66-97"
@@ -148,7 +173,7 @@ Unfortunately, many existing AEAD schemes, such as AES-GCM {{GCM}} and ChaCha20-
 
 This has led to practical attacks, such as the partitioning oracle attack {{LGR21}}, which can allow an attacker to guess many encryption passwords at once by repeatedly providing a ciphertext that successfully decrypts under different keys to an oracle (e.g. a server that knows the encryption key). Such a ciphertext that potentially decrypts under thousands of keys can be quickly computed by an attacker, although the complexity and scalability of attacks depends on the AEAD. This exploits a lack of key commitment.
 
-Another type of attack was demonstrated on Facebook Messenger's message franking scheme {{GLR17}}, which exploited a lack of message commitment. Due to end-to-end encryption, Facebook does not know a recipient's key. Therefore, when reporting a received message as abusive, the recipient must send their key for verification. However, a fake key could be used by the recipient to transform a harmless message from the sender into an abusive one.
+Another type of attack was demonstrated on Facebook Messenger's message franking scheme {{DGRW18}}, which exploited a lack of message commitment. Due to end-to-end encryption, Facebook does not know a recipient's key. Therefore, when reporting a received message as abusive, the recipient must send their key for verification. However, a fake key could be used by the recipient to transform a harmless message from the sender into an abusive one.
 
 Whilst such attacks only apply in certain scenarios, developers intuitively expect an AEAD to be committing, increasing the risk of falling prey to this type of protocol vulnerability. Moreover, certain mitigations require changes to primitives and cryptographic libraries, and many naive mitigations may leak information. For example, the padding fix and generic UtC transform {{ADGKLS22}} may lead to timing differences during decryption, and prepending an unsalted hash of the key leaks its identity.
 
