@@ -15,10 +15,10 @@ public static class ChaCha20BLAKE2b
     private const int BothUInt64BytesLength = UInt64BytesLength * 2;
     
     // Constants specific to ChaCha20-BLAKE2b
-    // C# arrays cannot be greater than int.MaxValue
+    // C# arrays cannot be greater than Array.MaxLength
     private const int N_MIN = 12;
-    private const int P_MAX = int.MaxValue - BothUInt64BytesLength - T_LEN;
-    private const int C_MAX = P_MAX + T_LEN;
+    private static readonly int P_MAX = Array.MaxLength - BothUInt64BytesLength - T_LEN;
+    private static readonly int C_MAX = P_MAX + T_LEN;
     private const string ENCRYPTION_CONTEXT = "ChaCha20.Encrypt()";
     private const string MAC_CONTEXT = "BLAKE2b-256.KeyedHash()";
     
@@ -28,7 +28,7 @@ public static class ChaCha20BLAKE2b
         if (ciphertext.Length != plaintext.Length + T_LEN) { throw new ArgumentOutOfRangeException(nameof(ciphertext), ciphertext.Length, $"The {nameof(ciphertext)} length must be equal to {plaintext.Length + T_LEN}."); }
         if (nonce.Length != N_MIN) { throw new ArgumentOutOfRangeException(nameof(nonce), nonce.Length, $"The {nameof(nonce)} length must be equal to {N_MIN}."); }
         if (key.Length != K_LEN) { throw new ArgumentOutOfRangeException(nameof(key), key.Length, $"The {nameof(key)} length must be equal to {K_LEN}."); }
-        if (associatedData != default) { _ = checked(plaintext.Length + associatedData.Length + BothUInt64BytesLength); }
+        if (associatedData != default && (long)plaintext.Length + associatedData.Length + BothUInt64BytesLength > Array.MaxLength) { throw new ArgumentOutOfRangeException(nameof(associatedData), associatedData.Length, $"The {nameof(associatedData)} length is too large with this plaintext."); }
         
         Span<byte> encryptionKey = stackalloc byte[K_LEN], macKey = stackalloc byte[K_LEN];
         DeriveKeys(encryptionKey, macKey, nonce, key);
@@ -56,7 +56,7 @@ public static class ChaCha20BLAKE2b
         if (plaintext.Length != ciphertext.Length - T_LEN) { throw new ArgumentOutOfRangeException(nameof(plaintext), plaintext.Length, $"The {nameof(plaintext)} length must be equal to {ciphertext.Length - T_LEN}."); }
         if (nonce.Length != N_MIN) { throw new ArgumentOutOfRangeException(nameof(nonce), nonce.Length, $"The {nameof(nonce)} length must be equal to {N_MIN}."); }
         if (key.Length != K_LEN) { throw new ArgumentOutOfRangeException(nameof(key), key.Length, $"The {nameof(key)} length must be equal to {K_LEN}."); }
-        if (associatedData != default) { _ = checked(plaintext.Length + associatedData.Length + BothUInt64BytesLength); }
+        if (associatedData != default && (long)plaintext.Length + associatedData.Length + BothUInt64BytesLength > Array.MaxLength) { throw new ArgumentOutOfRangeException(nameof(associatedData), associatedData.Length, $"The {nameof(associatedData)} length is too large with this ciphertext."); }
         
         ReadOnlySpan<byte> tag = ciphertext[^T_LEN..];
         
@@ -97,20 +97,7 @@ public static class ChaCha20BLAKE2b
         BinaryPrimitives.WriteUInt64LittleEndian(associatedDataLength, (ulong)associatedData.Length);
         BinaryPrimitives.WriteUInt64LittleEndian(ciphertextLength, (ulong)ciphertext.Length);
         Span<byte> message = new byte[associatedData.Length + ciphertext.Length + BothUInt64BytesLength];
-        switch (associatedData.Length) {
-            case > 0 when ciphertext.Length > 0:
-                Spans.Concat(message, associatedData, ciphertext, associatedDataLength, ciphertextLength);
-                break;
-            case 0 when ciphertext.Length > 0:
-                Spans.Concat(message, ciphertext, associatedDataLength, ciphertextLength);
-                break;
-            case > 0 when ciphertext.Length == 0:
-                Spans.Concat(message, associatedData, associatedDataLength, ciphertextLength);
-                break;
-            case 0 when ciphertext.Length == 0:
-                Spans.Concat(message, associatedDataLength, ciphertextLength);
-                break;
-        }
+        Spans.Concat(message, associatedData, ciphertext, associatedDataLength, ciphertextLength);
         BLAKE2b.ComputeTag(tag, message, macKey);
     }
 }
