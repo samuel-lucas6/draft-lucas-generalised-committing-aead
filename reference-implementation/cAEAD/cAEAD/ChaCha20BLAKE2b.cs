@@ -96,8 +96,12 @@ public static class ChaCha20BLAKE2b
         Span<byte> associatedDataLength = stackalloc byte[UInt64BytesLength], ciphertextLength = stackalloc byte[UInt64BytesLength];
         BinaryPrimitives.WriteUInt64LittleEndian(associatedDataLength, (ulong)associatedData.Length);
         BinaryPrimitives.WriteUInt64LittleEndian(ciphertextLength, (ulong)ciphertext.Length);
-        Span<byte> message = new byte[associatedData.Length + ciphertext.Length + BothUInt64BytesLength];
-        Spans.Concat(message, associatedData, ciphertext, associatedDataLength, ciphertextLength);
-        BLAKE2b.ComputeTag(tag, message, macKey);
+        
+        using var blake2b = new IncrementalBLAKE2b(tag.Length, macKey);
+        blake2b.Update(associatedData);
+        blake2b.Update(ciphertext);
+        blake2b.Update(associatedDataLength);
+        blake2b.Update(ciphertextLength);
+        blake2b.Finalize(tag);
     }
 }
