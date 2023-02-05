@@ -1,0 +1,1796 @@
+<!DOCTYPE html>
+<html lang="en" class="Internet-Draft">
+<head>
+<meta charset="utf-8">
+<meta content="Common,Latin" name="scripts">
+<meta content="initial-scale=1.0" name="viewport">
+<title>Encrypt-then-MAC for Committing AEAD (cAEAD)</title>
+<meta content="Samuel Lucas" name="author">
+<meta content="
+       This document describes how to construct a committing authenticated encryption with associated data (cAEAD) algorithm by combining an unauthenticated cipher and collision-resistant, hash-based message authentication code (MAC). 
+    " name="description">
+<meta content="xml2rfc 3.15.3" name="generator">
+<meta content="Internet-Draft" name="keyword">
+<meta content="draft-lucas-generalised-committing-aead-latest" name="ietf.draft">
+<!-- Generator version information:
+  xml2rfc 3.15.3
+    Python 3.10.8
+    appdirs 1.4.4
+    ConfigArgParse 1.5.3
+    google-i18n-address 2.5.2
+    html5lib 1.1
+    intervaltree 3.1.0
+    Jinja2 3.1.2
+    lxml 4.9.1
+    MarkupSafe 2.1.1
+    pycountry 22.3.5
+    PyYAML 6.0
+    requests 2.28.1
+    setuptools 65.6.0
+    six 1.16.0
+    wcwidth 0.2.5
+-->
+<link href="draft-lucas-generalised-committing-aead.xml" rel="alternate" type="application/rfc+xml">
+<link href="#copyright" rel="license">
+<style type="text/css">@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-cyrillic.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-cyrillic.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: local('Lora SemiBold'), local('Lora-SemiBold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-semibold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Cabin Condensed';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: local('Cabin Condensed SemiBold'), local('CabinCondensed-SemiBold'), url('https://martinthomson.github.io/rfc-css/fonts/cabincondensed-semibold-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Cabin Condensed';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: local('Cabin Condensed SemiBold'), local('CabinCondensed-SemiBold'), url('https://martinthomson.github.io/rfc-css/fonts/cabincondensed-semibold-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Cabin Condensed';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: local('Cabin Condensed SemiBold'), local('CabinCondensed-SemiBold'), url('https://martinthomson.github.io/rfc-css/fonts/cabincondensed-semibold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Oxygen Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Oxygen Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+:root {
+  color-scheme: light dark;
+  --background-color: #fff;
+  --text-color: #222;
+  --title-color: #191919;
+  --link-color: #2a6496;
+  --highlight-color: #f9f9f9;
+  --line-color: #eee;
+  --pilcrow-weak: #ddd;
+  --pilcrow-strong: #bbb;
+  --small-font-size: 14.5px;
+  --font-mono: 'Oxygen Mono', monospace;
+  scrollbar-color: #bbb #eee;
+}
+body {
+  max-width: 600px;
+  margin: 75px auto;
+  padding: 0 5px;
+  color: var(--text-color);
+  background-color: var(--background-color);
+  font: 16px/22px "Lora", serif;
+  scroll-behavior: smooth;
+}
+
+.ears {
+  display: none;
+}
+
+/* headings */
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Cabin Condensed", sans-serif;
+  font-weight: 600;
+  margin: 0.8em 0 0.3em;
+  font-size-adjust: 0.5;
+  color: var(--title-color);
+}
+h1#title {
+  font-size: 32px;
+  line-height: 40px;
+  clear: both;
+}
+h1#title, h1#rfcnum {
+  margin: 1.5em 0 0.2em;
+}
+h1#rfcnum + h1#title {
+  margin: 0.2em 0;
+}
+
+h1, h2, h3 {
+  font-size: 22px;
+  line-height: 27px;
+}
+h4, h5, h6 {
+  font-size: 20px;
+  line-height: 24px;
+}
+
+/* general structure */
+.author {
+  padding-bottom: 0.3em;
+}
+#abstract+p {
+  font-size: 18px;
+  line-height: 24px;
+}
+#abstract+p code, #abstract+p samp, #abstract+p tt {
+  font-size: 16px;
+  line-height: 0;
+}
+
+p {
+  padding: 0;
+  margin: 0.5em 0;
+  text-align: left;
+}
+div {
+  margin: 0;
+}
+.alignRight.art-text {
+  background-color: var(--highlight-color);
+  border: 1px solid var(--line-color);
+  border-radius: 3px;
+  padding: 0.5em 1em 0;
+  margin-bottom: 0.5em;
+}
+.alignRight.art-text pre {
+  padding: 0;
+  width: auto;
+}
+.alignRight {
+  margin: 1em 0;
+}
+.alignRight > *:first-child {
+  border: none;
+  margin: 0;
+  float: right;
+  clear: both;
+}
+.alignRight > *:nth-child(2) {
+  clear: both;
+  display: block;
+  border: none;
+}
+svg {
+  display: block;
+}
+/* font-family isn't space-separated, but =~ will have to do */
+svg[font-family~="monospace" i], svg [font-family~="monospace" i] {
+  font-family: var(--font-mono);
+}
+.alignCenter.art-text {
+  background-color: var(--highlight-color);
+  border: 1px solid var(--line-color);
+  border-radius: 3px;
+  padding: 0.5em 1em 0;
+  margin-bottom: 0.5em;
+}
+.alignCenter.art-text pre {
+  padding: 0;
+  width: auto;
+}
+.alignCenter {
+  margin: 1em 0;
+}
+.alignCenter > *:first-child {
+  border: none;
+  /* this isn't optimal, but it's an existence proof.  PrinceXML doesn't
+     support flexbox yet.
+  */
+  display: table;
+  margin: 0 auto;
+}
+
+/* lists */
+ol, ul {
+  padding: 0;
+  margin: 0 0 0.5em 2em;
+}
+:is(ol, ul) :is(ol, ul) {
+  margin-left: 1em;
+}
+li {
+  margin: 0 0 0.25em 0;
+}
+.ulCompact li {
+  margin: 0;
+}
+ul.empty, .ulEmpty {
+  list-style-type: none;
+}
+ul.empty li, .ulEmpty li {
+  margin-top: 0.5em;
+}
+:is(ul, ol).compact, .ulCompact, .olCompact {
+  line-height: 100%;
+  margin: 0 0 0 2em;
+}
+
+/* definition lists */
+dl {
+  clear: left;
+  --indent: 3ch;
+  /* --indent: attr(indent ch); not supported in any browser, but we can dream */
+}
+dl > dt {
+  float: left;
+  margin-right: 1em;
+  min-width: 12ch;
+}
+dl.dlNewline > dt {
+  float: none;
+}
+dl > dd {
+  margin-bottom: .8em;
+  margin-left: var(--indent) !important; /* stupid element overrides */
+  min-height: 2ex;
+}
+:is(dl.compact, .dlCompact) > dd {
+  margin-bottom: 0;
+}
+:is(dl.compact, .dlCompact) > dd > :is(:first-child, .break:first-child + *) {
+  margin-top: 0;
+}
+:is(dl.compact, .dlCompact) > dd > :is(:last-child) {
+  margin-bottom: 0;
+}
+dl > dd > dl {
+  margin-top: 0.5em;
+  margin-bottom: 0;
+}
+dl .break {
+  display: none;
+}
+
+/* links */
+a, a[href].selfRef:hover {
+  text-decoration: none;
+}
+a[href].selfRef {
+  color: var(--text-color);
+}
+a[href] {
+  color: var(--link-color);
+}
+a[href]:hover {
+  text-decoration: underline;
+}
+a[href].selfRef:hover {
+  background-color: var(--highlight-color);
+}
+a.xref {
+  white-space: nowrap;
+}
+
+/* Figures */
+tt, code, pre {
+  background-color: var(--highlight-color);
+  font: 14px/22px var(--font-mono);
+}
+tt, code {
+  /* changing the font for inline elements leads to different ascender
+     and descender heights; as we want to retain baseline alignment,
+     remove leading to avoid altering the final height of lines */
+  line-height: 0;
+}
+:is(h1, h2, h3, h4, h5, h6) :is(tt, code) {
+  font-size: 84%;
+}
+pre {
+  border: 1px solid var(--line-color);
+  font-size: 13.5px;
+  line-height: 16px;
+  letter-spacing: -0.2px;
+  margin: 5px;
+  padding: 5px;
+}
+img {
+  max-width: 100%;
+}
+figure {
+  margin: 0.5em 0;
+  padding: 0;
+}
+figure blockquote {
+  margin: 0.8em 0.4em 0.4em;
+}
+figcaption, caption {
+  font-style: italic;
+  margin: 0.5em 1.5em;
+  text-align: left;
+}
+@media screen {
+  /* Auto-collapse boilerplate. */
+  :is(#status-of-memo, #copyright) p {
+    margin: -2px 0;
+    max-height: 0;
+    transition: max-height 2s ease, margin 0.5s ease 0.5s;
+    overflow: hidden;
+  }
+  :is(#status-of-memo, #copyright):hover p,
+  :is(#status-of-memo, #copyright) h2:target ~ p {
+    margin: 0.5em 0;
+    max-height: 500px;
+    overflow: auto;
+  }
+  pre, svg {
+    display: inline-block;
+    overflow-x: auto;
+  }
+  pre {
+    max-width: 100%;
+    width: calc(100% - 22px - 1em);
+  }
+  svg {
+    max-width: calc(100% - 22px - 1em);
+  }
+  figure pre {
+    display: block;
+    width: calc(100% - 25px);
+  }
+  :is(pre, svg) + .pilcrow {
+    display: inline-block;
+    vertical-align: text-bottom;
+    padding-bottom: 8px;
+  }
+}
+
+/* aside, blockquote */
+aside, blockquote {
+  margin-left: 0;
+  padding: 0 2em;
+  font-style: italic;
+}
+blockquote {
+  margin: 1em 0;
+}
+cite {
+  display: block;
+  text-align: right;
+  font-style: italic;
+}
+
+/* tables */
+table {
+  max-width: 100%;
+  margin: 0 0 1em;
+  border-collapse: collapse;
+}
+table.right {
+  margin-left: auto;
+}
+table.center {
+  margin-left: auto;
+  margin-right: auto;
+}
+table.left {
+  margin-right: auto;
+}
+thead, tbody {
+  border: 1px solid var(--line-color);
+}
+th, td {
+  text-align: left;
+  vertical-align: top;
+  padding: 5px 10px;
+}
+th {
+  background-color: var(--line-color);
+}
+:is(tr:nth-child(2n), thead+tbody > tr:nth-child(2n+1)) > td {
+  background-color: var(--background-color);
+}
+:is(tr:nth-child(2n+1), thead+tbody > tr:nth-child(2n)) > td {
+  background-color: var(--highlight-color);
+}
+table caption {
+  margin: 0;
+  padding: 3px 0 3px 1em;
+}
+table p {
+  margin: 0;
+}
+
+/* pilcrow */
+a.pilcrow {
+  margin-left: 3px;
+  opacity: 0.2;
+  user-select: none;
+}
+a.pilcrow[href] { color: var(--pilcrow-weak); }
+a.pilcrow[href]:hover { text-decoration: none; }
+@media not print {
+  :hover > a.pilcrow {
+    opacity: 1;
+  }
+  a.pilcrow[href]:hover {
+    color: var(--pilcrow-strong);
+    background-color: transparent;
+  }
+}
+@media print {
+  a.pilcrow {
+    display: none;
+  }
+}
+
+/* misc */
+hr {
+  border: 0;
+  border-top: 1px solid var(--line-color);
+}
+.bcp14 {
+  font-variant: small-caps;
+  font-weight: 600;
+  font-size: 14.5px;
+}
+.role {
+  font-variant: all-small-caps;
+}
+
+/* info block */
+#identifiers {
+  margin: 0;
+  font-size: var(--small-font-size);
+  line-height: 18px;
+  --identifier-width: 15ch;
+}
+#identifiers dt {
+  width: var(--identifier-width);
+  min-width: var(--identifier-width);
+  clear: left;
+  float: left;
+  text-align: right;
+}
+#identifiers dd {
+  margin: 0;
+  margin-left: calc(1em + var(--identifier-width)) !important;
+  min-width: 5em;
+}
+#identifiers .authors .author {
+  display: inline-block;
+  margin-right: 1.5em;
+}
+#identifiers .authors .org {
+  font-style: italic;
+}
+
+/* The prepared/rendered info at the very bottom of the page */
+.docInfo {
+  color: #999;
+  font-size: 0.9em;
+  font-style: italic;
+  margin-top: 2em;
+}
+.docInfo .prepared {
+  float: left;
+}
+.docInfo .prepared {
+  float: right;
+}
+
+/* table of contents */
+#toc {
+  padding: 0.75em 0 2em 0;
+  margin-bottom: 1em;
+}
+#toc nav ul {
+  margin: 0 0.5em 0 0;
+  padding: 0;
+  list-style: none;
+}
+#toc nav li {
+  line-height: 1.3em;
+  margin: 0.75em 0;
+  padding-left: 1.2em;
+  text-indent: -1.2em;
+}
+#toc a.xref {
+  white-space: normal;
+}
+/* references */
+.references dt {
+  text-align: right;
+  font-weight: bold;
+  min-width: 7em;
+}
+.references dt:target::before {
+  content: "⇒";
+  width: 15px;
+  margin: 0 10px 0 -25px;
+}
+.references dd {
+  margin-left: 8em !important;
+  overflow: auto;
+}
+
+.refInstance {
+  margin-bottom: 1.25em;
+}
+
+.references .ascii {
+  margin-bottom: 0.25em;
+}
+
+/* index */
+#rfc\.index\.index + ul {
+  margin-left: 0;
+}
+
+/* authors */
+address.vcard {
+  font-style: normal;
+  margin: 1em 0;
+}
+address.vcard .nameRole {
+  font-weight: 700;
+  margin-left: 0;
+}
+address.vcard .label {
+  margin: 0.5em 0;
+}
+address.vcard .type {
+  display: none;
+}
+.alternative-contact {
+  margin: 1.5em 0 1em;
+}
+hr.addr {
+  border-top: 1px dashed;
+  margin: 0;
+  color: #ddd;
+  max-width: calc(100% - 16px);
+}
+@media (min-width: 500px) {
+  #authors-addresses > section {
+    column-count: 2;
+    column-gap: 20px;
+  }
+  #authors-addresses > section > h2 {
+    column-span: all;
+  }
+  /* hack for break-inside: avoid-column */
+  #authors-addresses address {
+    display: inline-block;
+    break-inside: avoid-column;
+  }
+}
+
+.rfcEditorRemove p:first-of-type {
+  font-style: italic;
+}
+.cref {
+  background-color: rgba(249, 232, 105, 0.3);
+  padding: 2px 4px;
+}
+.crefSource {
+  font-style: italic;
+}
+/* alternative layout for smaller screens */
+@media screen and (max-width: 929px) {
+  #toc {
+    position: fixed;
+    z-index: 2;
+    top: 0;
+    right: 0;
+    padding: 0;
+    margin: 0;
+    border-bottom: 1px solid #ccc;
+    opacity: 0.6;
+  }
+  #toc.active {
+      opacity: 1;
+  }
+  #toc h2 {
+    margin: 0;
+    padding: 2px 0 2px 6px;
+    padding-right: 1em;
+    font-size: 18px;
+    line-height: 24px;
+    min-width: 190px;
+    text-align: right;
+    background-color: #444;
+    color: white;
+    cursor: pointer;
+  }
+  #toc h2::before { /* css hamburger */
+    float: right;
+    position: relative;
+    width: 1em;
+    height: 1px;
+    left: -164px;
+    margin: 8px 0 0 0;
+    background: white none repeat scroll 0 0;
+    box-shadow: 0 4px 0 0 white, 0 8px 0 0 white;
+    content: "";
+  }
+  #toc nav {
+    display: none;
+    background-color: var(--background-color);
+    padding: 0.5em 1em 1em;
+    overflow: auto;
+    overscroll-behavior: contain;
+    height: calc(100vh - 48px);
+    border-left: 1px solid #ddd;
+  }
+  #toc.active nav {
+    display: block;
+  }
+  /* Make the collapsed ToC header render white on gray also when it's a link */
+  #toc h2 a,
+  #toc h2 a:link,
+  #toc h2 a:focus,
+  #toc h2 a:hover,
+  #toc a.toplink,
+  #toc a.toplink:hover {
+    color: white;
+    background-color: #444;
+    text-decoration: none;
+  }
+  #toc a.toplink {
+    margin-top: 2px;
+  }
+}
+
+/* alternative layout for wide screens */
+@media screen and (min-width: 930px) {
+  body {
+    padding-right: 360px;
+    padding-right: calc(min(180px + 20%, 500px));
+  }
+  #toc {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    right: calc(50vw - 480px);
+    width: 312px;
+    margin: 0;
+    padding: 0;
+    z-index: 1;
+  }
+  #toc h2 {
+    margin: 0;
+    padding: 0.25em 1em 1em 0;
+  }
+  #toc nav {
+    display: block;
+    height: calc(90vh - 84px);
+    bottom: 0;
+    padding: 0.5em 0 2em;
+    overflow: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+  #toc nav > ul  {
+    margin-bottom: 2em;
+  }
+  #toc ul {
+    margin: 0 0 0 4px;
+    font-size: var(--small-font-size);
+  }
+  #toc ul :is(p, li) {
+    margin: 2px 0;
+    line-height: 22px;
+  }
+  img { /* future proofing */
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* pagination */
+@media print {
+  body {
+    width: 100%;
+  }
+  p {
+    orphans: 3;
+    widows: 3;
+  }
+  #n-copyright-notice {
+    border-bottom: none;
+  }
+  #toc, #n-introduction {
+    page-break-before: always;
+  }
+  #toc {
+    border-top: none;
+    padding-top: 0;
+  }
+  figure, pre {
+    page-break-inside: avoid;
+  }
+  figure {
+    overflow: scroll;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+  h2+*, h3+*, h4+*, h5+*, h6+* {
+    page-break-before: avoid;
+  }
+  pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 10pt;
+  }
+  table {
+    border: 1px solid #ddd;
+  }
+  td {
+    border-top: 1px solid #ddd;
+  }
+}
+
+@page :first {
+  padding-top: 0;
+  @top-left {
+    content: normal;
+    border: none;
+  }
+  @top-center {
+    content: normal;
+    border: none;
+  }
+  @top-right {
+    content: normal;
+    border: none;
+  }
+}
+
+@page {
+  size: A4;
+  margin-bottom: 45mm;
+  padding-top: 20px;
+}
+
+/* Changes introduced to fix issues found during implementation */
+
+/* Separate body from document info even without intervening H1 */
+section {
+  clear: both;
+}
+
+/* Top align author divs, to avoid names without organization dropping level with org names */
+.author {
+  vertical-align: top;
+}
+
+/* Style section numbers with more space between number and title */
+.section-number {
+  padding-right: 0.5em;
+}
+
+/* Add styling for a link in the ToC that points to the top of the document */
+a.toplink {
+  float: right;
+  margin: 8px 0.5em 0;
+}
+
+/* Provide styling for table cell text alignment */
+table .text-left {
+  text-align: left;
+}
+table .text-center {
+  text-align: center;
+}
+table .text-right {
+  text-align: right;
+}
+
+/* Make the alternative author contact information look less like just another
+   author, and group it closer with the primary author contact information */
+.alternative-contact {
+  margin: 0.5em 0 0.25em 0;
+}
+address .non-ascii {
+  margin: 0 0 0 2em;
+}
+
+/* With it being possible to set tables with alignment
+  left, center, and right, { width: 100%; } does not make sense */
+table {
+  width: auto;
+}
+
+/* Avoid reference text that sits in a block with very wide left margin,
+   because of a long floating dt label.*/
+.references dd {
+  overflow: visible;
+}
+
+/* Control caption placement */
+caption {
+  caption-side: bottom;
+}
+
+/* Limit the width of the author address vcard, so names in right-to-left
+   script don't end up on the other side of the page. */
+
+address.vcard {
+  max-width: 20em;
+  margin-right: auto;
+}
+
+/* For address alignment dependent on LTR or RTL scripts */
+address div.left {
+  text-align: left;
+}
+address div.right {
+  text-align: right;
+}
+
+/* Give the table caption label the same styling as the figcaption */
+
+@media print {
+  .toplink {
+    display: none;
+  }
+
+  /* avoid overwriting the top border line with the ToC header */
+  #toc {
+    padding-top: 1px;
+  }
+
+  /* Avoid page breaks inside dl and author address entries */
+  dd {
+    page-break-before: avoid;
+  }
+  .vcard {
+    page-break-inside: avoid;
+  }
+
+}
+
+/* Dark mode. */
+@media (prefers-color-scheme: dark) {
+:root {
+  --background-color: #121212;
+  --text-color: #f0f0f0;
+  --title-color: #fff;
+  --link-color: #4da4f0;
+  --highlight-color: #282828;
+  --line-color: #444;
+  --pilcrow-weak: #444;
+  --pilcrow-strong: #666;
+  scrollbar-color: #777 #333;
+}
+}
+
+/* SVG Trick: a prefix match works because only black and white are allowed */
+svg :is([stroke="black"], [stroke^="#000"]) {
+  stroke: var(--text-color);
+}
+svg :is([stroke="white"], [stroke^="#fff"]) {
+  stroke: var(--background-color);
+}
+svg :is([fill="black"], [fill^="#000"], :not([fill])) {
+  fill: var(--text-color);
+}
+svg :is([stroke="fill"], [fill^="#fff"]) {
+  fill: var(--background-color);
+}
+</style>
+
+</head>
+<body class="xml2rfc">
+<table class="ears">
+<thead><tr>
+<td class="left">Internet-Draft</td>
+<td class="center">Encrypt-then-MAC for Committing AEAD (cA</td>
+<td class="right">December 2022</td>
+</tr></thead>
+<tfoot><tr>
+<td class="left">Lucas</td>
+<td class="center">Expires 10 June 2023</td>
+<td class="right">[Page]</td>
+</tr></tfoot>
+</table>
+<div id="external-metadata" class="document-information"></div>
+<div id="internal-metadata" class="document-information">
+<dl id="identifiers">
+<dt class="label-workgroup">Workgroup:</dt>
+<dd class="workgroup">Network Working Group</dd>
+<dt class="label-internet-draft">Internet-Draft:</dt>
+<dd class="internet-draft">draft-lucas-generalised-committing-aead-latest</dd>
+<dt class="label-published">Published:</dt>
+<dd class="published">
+<time datetime="2022-12-07" class="published">7 December 2022</time>
+    </dd>
+<dt class="label-intended-status">Intended Status:</dt>
+<dd class="intended-status">Informational</dd>
+<dt class="label-expires">Expires:</dt>
+<dd class="expires"><time datetime="2023-06-10">10 June 2023</time></dd>
+<dt class="label-authors">Author:</dt>
+<dd class="authors">
+<div class="author">
+      <div class="author-name">S. Lucas</div>
+<div class="org">Individual Contributor</div>
+</div>
+</dd>
+</dl>
+</div>
+<h1 id="title">Encrypt-then-MAC for Committing AEAD (cAEAD)</h1>
+<section id="section-abstract">
+      <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
+<p id="section-abstract-1">This document describes how to construct a committing authenticated encryption with associated data (cAEAD) algorithm by combining an unauthenticated cipher and collision-resistant, hash-based message authentication code (MAC).<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+</section>
+<section class="note rfcEditorRemove" id="section-note.1">
+      <h2 id="name-discussion-venues">
+<a href="#name-discussion-venues" class="section-name selfRef">Discussion Venues</a>
+      </h2>
+<p id="section-note.1-1">This note is to be removed before publishing as an RFC.<a href="#section-note.1-1" class="pilcrow">¶</a></p>
+<p id="section-note.1-2">Source for this draft and an issue tracker can be found at
+    <span><a href="https://github.com/samuel-lucas6/draft-lucas-generalised-committing-aead">https://github.com/samuel-lucas6/draft-lucas-generalised-committing-aead</a></span>.<a href="#section-note.1-2" class="pilcrow">¶</a></p>
+</section>
+<div id="status-of-memo">
+<section id="section-boilerplate.1">
+        <h2 id="name-status-of-this-memo">
+<a href="#name-status-of-this-memo" class="section-name selfRef">Status of This Memo</a>
+        </h2>
+<p id="section-boilerplate.1-1">
+        This Internet-Draft is submitted in full conformance with the
+        provisions of BCP 78 and BCP 79.<a href="#section-boilerplate.1-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-2">
+        Internet-Drafts are working documents of the Internet Engineering Task
+        Force (IETF). Note that other groups may also distribute working
+        documents as Internet-Drafts. The list of current Internet-Drafts is
+        at <span><a href="https://datatracker.ietf.org/drafts/current/">https://datatracker.ietf.org/drafts/current/</a></span>.<a href="#section-boilerplate.1-2" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-3">
+        Internet-Drafts are draft documents valid for a maximum of six months
+        and may be updated, replaced, or obsoleted by other documents at any
+        time. It is inappropriate to use Internet-Drafts as reference
+        material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-4">
+        This Internet-Draft will expire on 10 June 2023.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="copyright">
+<section id="section-boilerplate.2">
+        <h2 id="name-copyright-notice">
+<a href="#name-copyright-notice" class="section-name selfRef">Copyright Notice</a>
+        </h2>
+<p id="section-boilerplate.2-1">
+            Copyright (c) 2022 IETF Trust and the persons identified as the
+            document authors. All rights reserved.<a href="#section-boilerplate.2-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.2-2">
+            This document is subject to BCP 78 and the IETF Trust's Legal
+            Provisions Relating to IETF Documents
+            (<span><a href="https://trustee.ietf.org/license-info">https://trustee.ietf.org/license-info</a></span>) in effect on the date of
+            publication of this document. Please review these documents
+            carefully, as they describe your rights and restrictions with
+            respect to this document. Code Components extracted from this
+            document must include Revised BSD License text as described in
+            Section 4.e of the Trust Legal Provisions and are provided without
+            warranty as described in the Revised BSD License.<a href="#section-boilerplate.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="toc">
+<section id="section-toc.1">
+        <a href="#" onclick="scroll(0,0)" class="toplink">▲</a><h2 id="name-table-of-contents">
+<a href="#name-table-of-contents" class="section-name selfRef">Table of Contents</a>
+        </h2>
+<nav class="toc"><ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1">
+            <p id="section-toc.1-1.1.1" class="keepWithNext"><a href="#section-1" class="auto internal xref">1</a>.  <a href="#name-introduction" class="internal xref">Introduction</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2">
+            <p id="section-toc.1-1.2.1" class="keepWithNext"><a href="#section-2" class="auto internal xref">2</a>.  <a href="#name-conventions-and-definitions" class="internal xref">Conventions and Definitions</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3">
+            <p id="section-toc.1-1.3.1"><a href="#section-3" class="auto internal xref">3</a>.  <a href="#name-the-generalised-caead-schem" class="internal xref">The Generalised cAEAD Scheme</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.1">
+                <p id="section-toc.1-1.3.2.1.1" class="keepWithNext"><a href="#section-3.1" class="auto internal xref">3.1</a>.  <a href="#name-authenticated-encryption" class="internal xref">Authenticated Encryption</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2">
+                <p id="section-toc.1-1.3.2.2.1"><a href="#section-3.2" class="auto internal xref">3.2</a>.  <a href="#name-authenticated-decryption" class="internal xref">Authenticated Decryption</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4">
+            <p id="section-toc.1-1.4.1"><a href="#section-4" class="auto internal xref">4</a>.  <a href="#name-chacha20-blake2b" class="internal xref">ChaCha20-BLAKE2b</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5">
+            <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>.  <a href="#name-security-considerations" class="internal xref">Security Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6">
+            <p id="section-toc.1-1.6.1"><a href="#section-6" class="auto internal xref">6</a>.  <a href="#name-iana-considerations" class="internal xref">IANA Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7">
+            <p id="section-toc.1-1.7.1"><a href="#section-7" class="auto internal xref">7</a>.  <a href="#name-references" class="internal xref">References</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.1">
+                <p id="section-toc.1-1.7.2.1.1"><a href="#section-7.1" class="auto internal xref">7.1</a>.  <a href="#name-normative-references" class="internal xref">Normative References</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.2">
+                <p id="section-toc.1-1.7.2.2.1"><a href="#section-7.2" class="auto internal xref">7.2</a>.  <a href="#name-informative-references" class="internal xref">Informative References</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8">
+            <p id="section-toc.1-1.8.1"><a href="#appendix-A" class="auto internal xref">Appendix A</a>.  <a href="#name-test-vectors" class="internal xref">Test Vectors</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.1">
+                <p id="section-toc.1-1.8.2.1.1"><a href="#appendix-A.1" class="auto internal xref">A.1</a>.  <a href="#name-chacha20-blake2b-2" class="internal xref">ChaCha20-BLAKE2b</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.1.2.1">
+                    <p id="section-toc.1-1.8.2.1.2.1.1"><a href="#appendix-A.1.1" class="auto internal xref">A.1.1</a>.  <a href="#name-test-vector-1" class="internal xref">Test Vector 1</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.1.2.2">
+                    <p id="section-toc.1-1.8.2.1.2.2.1"><a href="#appendix-A.1.2" class="auto internal xref">A.1.2</a>.  <a href="#name-test-vector-2" class="internal xref">Test Vector 2</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.1.2.3">
+                    <p id="section-toc.1-1.8.2.1.2.3.1"><a href="#appendix-A.1.3" class="auto internal xref">A.1.3</a>.  <a href="#name-test-vector-3" class="internal xref">Test Vector 3</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.1.2.4">
+                    <p id="section-toc.1-1.8.2.1.2.4.1"><a href="#appendix-A.1.4" class="auto internal xref">A.1.4</a>.  <a href="#name-test-vector-4" class="internal xref">Test Vector 4</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.1.2.5">
+                    <p id="section-toc.1-1.8.2.1.2.5.1"><a href="#appendix-A.1.5" class="auto internal xref">A.1.5</a>.  <a href="#name-test-vector-5" class="internal xref">Test Vector 5</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.1.2.6">
+                    <p id="section-toc.1-1.8.2.1.2.6.1"><a href="#appendix-A.1.6" class="auto internal xref">A.1.6</a>.  <a href="#name-test-vector-6" class="internal xref">Test Vector 6</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.1.2.7">
+                    <p id="section-toc.1-1.8.2.1.2.7.1"><a href="#appendix-A.1.7" class="auto internal xref">A.1.7</a>.  <a href="#name-test-vector-7" class="internal xref">Test Vector 7</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.1.2.8">
+                    <p id="section-toc.1-1.8.2.1.2.8.1"><a href="#appendix-A.1.8" class="auto internal xref">A.1.8</a>.  <a href="#name-test-vector-8" class="internal xref">Test Vector 8</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.1.2.9">
+                    <p id="section-toc.1-1.8.2.1.2.9.1"><a href="#appendix-A.1.9" class="auto internal xref">A.1.9</a>.  <a href="#name-test-vector-9" class="internal xref">Test Vector 9</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.1.2.10">
+                    <p id="section-toc.1-1.8.2.1.2.10.1"><a href="#appendix-A.1.10" class="auto internal xref">A.1.10</a>. <a href="#name-test-vector-10" class="internal xref">Test Vector 10</a></p>
+</li>
+                </ul>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9">
+            <p id="section-toc.1-1.9.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-acknowledgments" class="internal xref">Acknowledgments</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10">
+            <p id="section-toc.1-1.10.1"><a href="#appendix-C" class="auto internal xref"></a><a href="#name-authors-address" class="internal xref">Author's Address</a></p>
+</li>
+        </ul>
+</nav>
+</section>
+</div>
+<div id="introduction">
+<section id="section-1">
+      <h2 id="name-introduction">
+<a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
+      </h2>
+<p id="section-1-1">Authenticated encryption with associated data (AEAD) schemes provide confidentiality and authenticity. However, research has revealed that if keys can be adversarial, these properties are not enough. Instead, AEADs also need to be committing, meaning the ciphertext is a binding commitment of all the AEAD inputs. This requires collision resistance <span>[<a href="#BH22" class="cite xref">BH22</a>]</span>.<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-2">Unfortunately, many existing AEAD schemes, such as AES-GCM <span>[<a href="#GCM" class="cite xref">GCM</a>]</span> and ChaCha20-Poly1305 <span>[<a href="#RFC8439" class="cite xref">RFC8439</a>]</span>, are not committing. This means it is possible for authentication to pass for multiple different keys. Thus, a ciphertext can be successfully decrypted to different plaintexts <span>[<a href="#ADGKLS22" class="cite xref">ADGKLS22</a>]</span>. Furthermore, an attacker who knows the key can find different messages that lead to the same authentication tag.<a href="#section-1-2" class="pilcrow">¶</a></p>
+<p id="section-1-3">This has led to practical attacks, such as the partitioning oracle attack <span>[<a href="#LGR21" class="cite xref">LGR21</a>]</span>, which can allow an attacker to guess many encryption passwords at once by repeatedly providing a ciphertext that successfully decrypts under different keys to an oracle (e.g. a server that knows the encryption key). Such a ciphertext that potentially decrypts under thousands of keys can quickly be computed by an attacker, although the complexity and scalability of attacks depends on the AEAD. This exploits a lack of key commitment.<a href="#section-1-3" class="pilcrow">¶</a></p>
+<p id="section-1-4">Another type of attack was demonstrated on Facebook Messenger's message franking scheme <span>[<a href="#DGRW18" class="cite xref">DGRW18</a>]</span>, which exploited a lack of message commitment. Due to end-to-end encryption, Facebook does not know a recipient's key. Therefore, when reporting a received message as abusive, the recipient must send their key for verification. However, a fake key could be used by the recipient to transform a harmless message from the sender into an abusive one.<a href="#section-1-4" class="pilcrow">¶</a></p>
+<p id="section-1-5">Whilst such attacks only apply in certain scenarios, developers intuitively expect an AEAD to be committing, increasing the risk of falling prey to this type of protocol vulnerability. Moreover, certain mitigations require changes to primitives and cryptographic libraries, and many naive mitigations may leak information. For example, the padding fix and generic UtC transform <span>[<a href="#ADGKLS22" class="cite xref">ADGKLS22</a>]</span> may lead to timing differences during decryption, and prepending an unsalted hash of the key leaks its identity.<a href="#section-1-5" class="pilcrow">¶</a></p>
+<p id="section-1-6">However, Encrypt-then-MAC with the encryption key and authentication key derived from the same input keying material and a 256-bit or greater authentication tag from a collision-resistant, hash-based MAC is committing <span>[<a href="#GLR17" class="cite xref">GLR17</a>]</span>. This combination has been widely used, well analysed <span>[<a href="#BN00" class="cite xref">BN00</a>]</span>, provides additional security against forgeries, and can sometimes be more performant than certain existing AEAD schemes.<a href="#section-1-6" class="pilcrow">¶</a></p>
+<p id="section-1-7">The partitioning oracle attack authors recommend using a committing AEAD (cAEAD) by default when non-committing AEAD vulnerabilities cannot be ruled out <span>[<a href="#LGR21" class="cite xref">LGR21</a>]</span>. Therefore, this document introduces a simple Encrypt-then-MAC cAEAD scheme that can be implemented using an unauthenticated cipher and collision-resistant, hash-based MAC from a cryptographic library. For instance, ChaCha20 <span>[<a href="#RFC8439" class="cite xref">RFC8439</a>]</span> and BLAKE2b <span>[<a href="#RFC7693" class="cite xref">RFC7693</a>]</span>.<a href="#section-1-7" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="conventions-and-definitions">
+<section id="section-2">
+      <h2 id="name-conventions-and-definitions">
+<a href="#section-2" class="section-number selfRef">2. </a><a href="#name-conventions-and-definitions" class="section-name selfRef">Conventions and Definitions</a>
+      </h2>
+<p id="section-2-1">The key words "<span class="bcp14">MUST</span>", "<span class="bcp14">MUST NOT</span>", "<span class="bcp14">REQUIRED</span>", "<span class="bcp14">SHALL</span>", "<span class="bcp14">SHALL NOT</span>", "<span class="bcp14">SHOULD</span>", "<span class="bcp14">SHOULD NOT</span>", "<span class="bcp14">RECOMMENDED</span>", "<span class="bcp14">NOT RECOMMENDED</span>",
+"<span class="bcp14">MAY</span>", and "<span class="bcp14">OPTIONAL</span>" in this document are to be interpreted as
+described in BCP 14 <span>[<a href="#RFC2119" class="cite xref">RFC2119</a>]</span> <span>[<a href="#RFC8174" class="cite xref">RFC8174</a>]</span> when, and only when, they
+appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶</a></p>
+<p id="section-2-2">Operations:<a href="#section-2-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-2-3.1">
+          <code>a || b</code>: the concatenation of <code>a</code> and <code>b</code>.<a href="#section-2-3.1" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-2-3.2">
+          <code>a.Length</code>: the length of <code>a</code> in octets.<a href="#section-2-3.2" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-2-3.3">
+          <code>LE64(x)</code>: the little-endian encoding of 64-bit unsigned integer <code>x</code>.<a href="#section-2-3.3" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-2-3.4">
+          <code>UTF8(s)</code>: the UTF8 encoding of string <code>s</code>.<a href="#section-2-3.4" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-2-3.5">
+          <code>a.Slice(i, l)</code>: the copy of <code>l</code> octets from <code>a</code>, starting at index <code>i</code>.<a href="#section-2-3.5" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-2-3.6">
+          <code>Encrypt(p, n, k)</code>: the unauthenticated encryption of plaintext <code>p</code> using nonce <code>n</code> and key <code>k</code>.<a href="#section-2-3.6" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-2-3.7">
+          <code>MAC(m, k, l)</code>: the <code>l</code>-bit MAC of message <code>m</code> using key <code>k</code>.<a href="#section-2-3.7" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-2-3.8">
+          <code>ConstantTimeEquals(a, b)</code>: the constant time comparison of <code>a</code> and <code>b</code>, which returns <code>true</code> if equal and <code>false</code> otherwise.<a href="#section-2-3.8" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-2-3.9">
+          <code>Decrypt(c, n, k)</code>: the unauthenticated decryption of ciphertext <code>c</code> without the appended tag using nonce <code>n</code> and key <code>k</code>.<a href="#section-2-3.9" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-2-3.10">
+          <code>ZeroMemory(a)</code>: overwrite <code>a</code> with zeros in a way that is not optimised away by the compiler.<a href="#section-2-3.10" class="pilcrow">¶</a>
+</li>
+      </ul>
+<p id="section-2-4">Internals:<a href="#section-2-4" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-2-5.1">
+          <code>T_LEN</code>: the authentication tag length, which <span class="bcp14">MUST</span> be 32 octets (256 bits).<a href="#section-2-5.1" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-2-5.2">
+          <code>ENCRYPTION_CONTEXT</code>: "Cipher.Encrypt()", replacing "Cipher" with the properly capitalised and punctuated name of the cipher being used. For example, "ChaCha20.Encrypt()" or "AES-CTR.Encrypt()".<a href="#section-2-5.2" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-2-5.3">
+          <code>MAC_CONTEXT</code>: "MAC.KeyedHash()", replacing "MAC" with the properly capitalised and punctuated name of the MAC being used, followed by "-" and the output length in bits if that is missing from the name. If the MAC output length is being truncated, both the full output length and truncated output length <span class="bcp14">MUST</span> be specified. For example, "BLAKE2b-256.KeyedHash()", "BLAKE2b-512-256.KeyedHash()" (truncated BLAKE2b-512), "HMAC-SHA-256.KeyedHash()", "HMAC-SHA-512-256.KeyedHash()" (truncated HMAC-SHA-512), or "HMAC-SHA-512/256.KeyedHash()" (HMAC with the SHA-512/256 algorithm).<a href="#section-2-5.3" class="pilcrow">¶</a>
+</li>
+      </ul>
+<p id="section-2-6">Inputs and outputs:<a href="#section-2-6" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-2-7.1">
+          <code>K_LEN</code>: the key length, which <span class="bcp14">MUST</span> be 32 octets (256 bits).<a href="#section-2-7.1" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-2-7.2">
+          <code>N_MIN</code>/<code>N_MAX</code>: the nonce length, which <span class="bcp14">MUST</span> be the maximum nonce length supported by the cipher being used. For example, 12 octets (96 bits) for ChaCha20 <span>[<a href="#RFC8439" class="cite xref">RFC8439</a>]</span>.<a href="#section-2-7.2" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-2-7.3">
+          <code>A_MAX</code>: 2<sup>64</sup>-1 octets.<a href="#section-2-7.3" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-2-7.4">
+          <code>P_MAX</code>: 2<sup>64</sup>-1 octets unless the cipher being used requires a smaller maximum plaintext length to avoid the internal counter repeating or a collision being likely with a 50% probability. For example, 274,877,906,880 octets <span class="bcp14">MUST</span> be the maximum for ChaCha20 <span>[<a href="#RFC8439" class="cite xref">RFC8439</a>]</span>.<a href="#section-2-7.4" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-2-7.5">
+          <code>C_MAX</code>: <code>P_MAX</code> + <code>T_LEN</code>.<a href="#section-2-7.5" class="pilcrow">¶</a>
+</li>
+      </ul>
+<p id="section-2-8">The meanings of these parameters are defined in <span>[<a href="#RFC5116" class="cite xref">RFC5116</a>], <a href="https://rfc-editor.org/rfc/rfc5116#section-4" class="relref">Section 4</a></span>.<a href="#section-2-8" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="the-generalised-caead-scheme">
+<section id="section-3">
+      <h2 id="name-the-generalised-caead-schem">
+<a href="#section-3" class="section-number selfRef">3. </a><a href="#name-the-generalised-caead-schem" class="section-name selfRef">The Generalised cAEAD Scheme</a>
+      </h2>
+<p id="section-3-1">This scheme combines two primitives:<a href="#section-3-1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-3-2">
+<li id="section-3-2.1">An unauthenticated stream cipher or block cipher. The key size <span class="bcp14">MUST</span> be 256 bits.<a href="#section-3-2.1" class="pilcrow">¶</a>
+</li>
+        <li id="section-3-2.2">A collision-resistant keyed hash function or collision-resistant hash function used within HMAC <span>[<a href="#RFC2104" class="cite xref">RFC2104</a>]</span>. The output length <span class="bcp14">MUST</span> be 256 bits or truncated to 256 bits.<a href="#section-3-2.2" class="pilcrow">¶</a>
+</li>
+      </ol>
+<p id="section-3-3">Importantly, the MAC <span class="bcp14">MUST</span> be hash-based and collision resistant. This ensures the ciphertext is a commitment of all the inputs, corresponding to security notion CMT-4 <span>[<a href="#BH22" class="cite xref">BH22</a>]</span>. This provides the best security and ease of use by default.<a href="#section-3-3" class="pilcrow">¶</a></p>
+<div id="authenticated-encryption">
+<section id="section-3.1">
+        <h3 id="name-authenticated-encryption">
+<a href="#section-3.1" class="section-number selfRef">3.1. </a><a href="#name-authenticated-encryption" class="section-name selfRef">Authenticated Encryption</a>
+        </h3>
+<div class="alignLeft art-text artwork" id="section-3.1-1">
+<pre>
+Encrypt(plaintext, nonce, key, associatedData)
+</pre><a href="#section-3.1-1" class="pilcrow">¶</a>
+</div>
+<p id="section-3.1-2">The <code>Encrypt</code> function encrypts a plaintext message, authenticates the ciphertext and associated data, and returns the ciphertext concatenated with the authentication tag.<a href="#section-3.1-2" class="pilcrow">¶</a></p>
+<p id="section-3.1-3">Inputs:<a href="#section-3.1-3" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-3.1-4.1">
+            <code>plaintext</code>: the plaintext to be encrypted (length <span class="bcp14">MUST</span> be less than <code>P_MAX</code>).<a href="#section-3.1-4.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-3.1-4.2">
+            <code>nonce</code>: the public nonce (length <span class="bcp14">MUST</span> be <code>N_MIN</code>).<a href="#section-3.1-4.2" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-3.1-4.3">
+            <code>key</code>: the secret key (length <span class="bcp14">MUST</span> be <code>K_LEN</code>).<a href="#section-3.1-4.3" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-3.1-4.4">
+            <code>associatedData</code>: the associated data to authenticate (length <span class="bcp14">MUST</span> be less than <code>A_MAX</code>).<a href="#section-3.1-4.4" class="pilcrow">¶</a>
+</li>
+        </ul>
+<p id="section-3.1-5">Distinct associated data inputs, as described in <span>[<a href="#RFC5116" class="cite xref">RFC5116</a>], <a href="https://rfc-editor.org/rfc/rfc5116#section-3" class="relref">Section 3</a></span>, will be unambiguously encoded as a single input. The application <span class="bcp14">MUST</span> create a structure in the associated data input if needed.<a href="#section-3.1-5" class="pilcrow">¶</a></p>
+<p id="section-3.1-6">Outputs:<a href="#section-3.1-6" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-3.1-7.1">The ciphertext concatenated with the authentication tag or an error if the inputs do not meet the length criteria above.<a href="#section-3.1-7.1" class="pilcrow">¶</a>
+</li>
+        </ul>
+<p id="section-3.1-8">Steps:<a href="#section-3.1-8" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-3.1-9">
+<pre>
+encryptionKey = MAC(UTF8(ENCRYPTION_CONTEXT), key, K_LEN)
+macKey = MAC(UTF8(MAC_CONTEXT) || nonce, key, K_LEN)
+
+ciphertext = Encrypt(plaintext, nonce, encryptionKey)
+
+tag = MAC(associatedData || ciphertext || LE64(associatedData.Length) || LE64(ciphertext.Length), macKey, T_LEN)
+
+ZeroMemory(encryptionKey)
+ZeroMemory(macKey)
+
+return ciphertext || tag
+</pre><a href="#section-3.1-9" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="authenticated-decryption">
+<section id="section-3.2">
+        <h3 id="name-authenticated-decryption">
+<a href="#section-3.2" class="section-number selfRef">3.2. </a><a href="#name-authenticated-decryption" class="section-name selfRef">Authenticated Decryption</a>
+        </h3>
+<div class="alignLeft art-text artwork" id="section-3.2-1">
+<pre>
+Decrypt(ciphertext, nonce, key, associatedData)
+</pre><a href="#section-3.2-1" class="pilcrow">¶</a>
+</div>
+<p id="section-3.2-2">The <code>Decrypt</code> function verifies that the authentication tag is correct for the given inputs and returns the decrypted ciphertext on success or an error if verification fails.<a href="#section-3.2-2" class="pilcrow">¶</a></p>
+<p id="section-3.2-3">Inputs:<a href="#section-3.2-3" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-3.2-4.1">
+            <code>ciphertext</code>: the ciphertext and appended tag to be authenticated and decrypted (length <span class="bcp14">MUST</span> be less than <code>C_MAX</code>).<a href="#section-3.2-4.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-3.2-4.2">
+            <code>nonce</code>: the public nonce (length <span class="bcp14">MUST</span> be <code>N_MIN</code>).<a href="#section-3.2-4.2" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-3.2-4.3">
+            <code>key</code>: the secret key (length <span class="bcp14">MUST</span> be <code>K_LEN</code>).<a href="#section-3.2-4.3" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-3.2-4.4">
+            <code>associatedData</code>: the associated data to authenticate (length <span class="bcp14">MUST</span> be less than <code>A_MAX</code>).<a href="#section-3.2-4.4" class="pilcrow">¶</a>
+</li>
+        </ul>
+<p id="section-3.2-5">Outputs:<a href="#section-3.2-5" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-3.2-6.1">Either the decrypted plaintext or an error indicating that the authentication tag is invalid for the given inputs.<a href="#section-3.2-6.1" class="pilcrow">¶</a>
+</li>
+        </ul>
+<p id="section-3.2-7">Steps:<a href="#section-3.2-7" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-3.2-8">
+<pre>
+tag = ciphertext.Slice(ciphertext.Length - T_LEN, T_LEN)
+
+ciphertextNoTag = ciphertext.Slice(0, ciphertext.Length - T_LEN)
+
+encryptionKey = MAC(UTF8(ENCRYPTION_CONTEXT), key, K_LEN)
+macKey = MAC(UTF8(MAC_CONTEXT) || nonce, key, K_LEN)
+
+computedTag = MAC(associatedData || ciphertextNoTag || LE64(associatedData.Length) || LE64(ciphertextNoTag.Length), macKey, T_LEN)
+
+ZeroMemory(macKey)
+
+if (ConstantTimeEquals(tag, computedTag) is false)
+    ZeroMemory(encryptionKey)
+    return "authentication failed" error
+else
+    plaintext = Decrypt(ciphertextNoTag, nonce, encryptionKey)
+    ZeroMemory(encryptionKey)
+    return plaintext
+</pre><a href="#section-3.2-8" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+</section>
+</div>
+<div id="chacha20-blake2b">
+<section id="section-4">
+      <h2 id="name-chacha20-blake2b">
+<a href="#section-4" class="section-number selfRef">4. </a><a href="#name-chacha20-blake2b" class="section-name selfRef">ChaCha20-BLAKE2b</a>
+      </h2>
+<p id="section-4-1">This algorithm is an instantiation of the generalised cAEAD scheme discussed above using ChaCha20 <span>[<a href="#RFC8439" class="cite xref">RFC8439</a>]</span> as the cipher and BLAKE2b <span>[<a href="#RFC7693" class="cite xref">RFC7693</a>]</span> as the MAC.<a href="#section-4-1" class="pilcrow">¶</a></p>
+<p id="section-4-2">The context strings are:<a href="#section-4-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-4-3.1">
+          <code>ENCRYPTION_CONTEXT</code>: "ChaCha20.Encrypt()".<a href="#section-4-3.1" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-4-3.2">
+          <code>MAC_CONTEXT</code>: "BLAKE2b-256.KeyedHash()".<a href="#section-4-3.2" class="pilcrow">¶</a>
+</li>
+      </ul>
+<p id="section-4-4">The ChaCha20 specific input and output lengths are:<a href="#section-4-4" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-4-5.1">
+          <code>N_MIN</code>/<code>N_MAX</code>: 12 octets (96 bits).<a href="#section-4-5.1" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-4-5.2">
+          <code>P_MAX</code>: 274,877,906,880 octets.<a href="#section-4-5.2" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-4-5.3">
+          <code>C_MAX</code>: <code>P_MAX</code> + <code>T_LEN</code> octets.<a href="#section-4-5.3" class="pilcrow">¶</a>
+</li>
+      </ul>
+<p id="section-4-6">The rest of the lengths remain the same for all instantiations of this generalised cAEAD scheme.<a href="#section-4-6" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="security-considerations">
+<section id="section-5">
+      <h2 id="name-security-considerations">
+<a href="#section-5" class="section-number selfRef">5. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
+      </h2>
+<p id="section-5-1">The security of this generalised scheme depends on the unauthenticated cipher and collision-resistant, hash-based MAC used. For instance, ChaCha20 should provide 256-bit security against plaintext recovery, and HMAC-SHA256 should provide at least 128-bit security against forgery attacks. A 256-bit tag provides 128-bit security against collisions. This collision resistance should make it infeasible for a ciphertext to be decrypted under multiple keys and for two messages to have the same tag.<a href="#section-5-1" class="pilcrow">¶</a></p>
+<p id="section-5-2">The nonce <span class="bcp14">MUST NOT</span> be repeated or reused for a given key. Doing so is catastrophic for security. For example, it results in identical keystreams with stream ciphers, which leaks the XOR of the plaintexts.<a href="#section-5-2" class="pilcrow">¶</a></p>
+<p id="section-5-3">The authentication tag comparison <span class="bcp14">MUST</span> be done in constant time to avoid leaking information via timing.<a href="#section-5-3" class="pilcrow">¶</a></p>
+<p id="section-5-4">If authentication fails, the ciphertext <span class="bcp14">MUST NOT</span> be decrypted.<a href="#section-5-4" class="pilcrow">¶</a></p>
+<p id="section-5-5">A larger MAC output length (e.g. 512 bits) that gets truncated to 256 bits <span class="bcp14">MAY</span> be used as long as the <code>MAC_CONTEXT</code> string is specified as instructed. However, the MAC output length <span class="bcp14">MUST NOT</span> be less than or truncated below 256 bits as this would affect the collision resistance, which is needed for this scheme to be committing.<a href="#section-5-5" class="pilcrow">¶</a></p>
+<p id="section-5-6">Every key <span class="bcp14">MUST</span> be randomly chosen from a uniform distribution. This means randomly generated using a cryptographically secure pseudorandom number generator (CSPRNG) or the output of a key derivation function (KDF).<a href="#section-5-6" class="pilcrow">¶</a></p>
+<p id="section-5-7">The nonce <span class="bcp14">MAY</span> be public and/or predictable. It can be a counter, the output of a KDF by deriving the nonce alongside the key, or randomly generated using a CSPRNG. However, care <span class="bcp14">MUST</span> be taken to ensure that the likelihood of two randomly generated nonces colliding is low by frequently rotating the key being used.<a href="#section-5-7" class="pilcrow">¶</a></p>
+<p id="section-5-8">The internally derived <code>encryptionKey</code> and <code>macKey</code> <span class="bcp14">SHOULD</span> be erased from memory before returning an output. However, this may not be possible in some programming languages.<a href="#section-5-8" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="iana-considerations">
+<section id="section-6">
+      <h2 id="name-iana-considerations">
+<a href="#section-6" class="section-number selfRef">6. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
+      </h2>
+<p id="section-6-1">IANA is requested to assign an entry for <code>AEAD_ChaCha20_BLAKE2b</code> in the AEAD Registry with this document as the reference.<a href="#section-6-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<section id="section-7">
+      <h2 id="name-references">
+<a href="#section-7" class="section-number selfRef">7. </a><a href="#name-references" class="section-name selfRef">References</a>
+      </h2>
+<section id="section-7.1">
+        <h3 id="name-normative-references">
+<a href="#section-7.1" class="section-number selfRef">7.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+        </h3>
+<dl class="references">
+<dt id="RFC2104">[RFC2104]</dt>
+        <dd>
+<span class="refAuthor">Krawczyk, H.</span>, <span class="refAuthor">Bellare, M.</span>, and <span class="refAuthor">R. Canetti</span>, <span class="refTitle">"HMAC: Keyed-Hashing for Message Authentication"</span>, <span class="seriesInfo">RFC 2104</span>, <span class="seriesInfo">DOI 10.17487/RFC2104</span>, <time datetime="1997-02" class="refDate">February 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2104">https://www.rfc-editor.org/rfc/rfc2104</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC2119">[RFC2119]</dt>
+        <dd>
+<span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03" class="refDate">March 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2119">https://www.rfc-editor.org/rfc/rfc2119</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC5116">[RFC5116]</dt>
+        <dd>
+<span class="refAuthor">McGrew, D.</span>, <span class="refTitle">"An Interface and Algorithms for Authenticated Encryption"</span>, <span class="seriesInfo">RFC 5116</span>, <span class="seriesInfo">DOI 10.17487/RFC5116</span>, <time datetime="2008-01" class="refDate">January 2008</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc5116">https://www.rfc-editor.org/rfc/rfc5116</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC7693">[RFC7693]</dt>
+        <dd>
+<span class="refAuthor">Saarinen, M-J., Ed.</span> and <span class="refAuthor">J-P. Aumasson</span>, <span class="refTitle">"The BLAKE2 Cryptographic Hash and Message Authentication Code (MAC)"</span>, <span class="seriesInfo">RFC 7693</span>, <span class="seriesInfo">DOI 10.17487/RFC7693</span>, <time datetime="2015-11" class="refDate">November 2015</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc7693">https://www.rfc-editor.org/rfc/rfc7693</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8174">[RFC8174]</dt>
+        <dd>
+<span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time datetime="2017-05" class="refDate">May 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8174">https://www.rfc-editor.org/rfc/rfc8174</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8439">[RFC8439]</dt>
+      <dd>
+<span class="refAuthor">Nir, Y.</span> and <span class="refAuthor">A. Langley</span>, <span class="refTitle">"ChaCha20 and Poly1305 for IETF Protocols"</span>, <span class="seriesInfo">RFC 8439</span>, <span class="seriesInfo">DOI 10.17487/RFC8439</span>, <time datetime="2018-06" class="refDate">June 2018</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8439">https://www.rfc-editor.org/rfc/rfc8439</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+<section id="section-7.2">
+        <h3 id="name-informative-references">
+<a href="#section-7.2" class="section-number selfRef">7.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
+        </h3>
+<dl class="references">
+<dt id="ADGKLS22">[ADGKLS22]</dt>
+        <dd>
+<span class="refAuthor">Albertini, A.</span>, <span class="refAuthor">Duong, T.</span>, <span class="refAuthor">Gueron, S.</span>, <span class="refAuthor">Kölbl, S.</span>, <span class="refAuthor">Luykx, A.</span>, and <span class="refAuthor">S. Schmieg</span>, <span class="refTitle">"How to Abuse and Fix Authenticated Encryption Without Key Commitment"</span>, <span class="refContent">31st USENIX Security Symposium (USENIX Security 22)</span>, <time datetime="2022" class="refDate">2022</time>, <span>&lt;<a href="https://www.usenix.org/conference/usenixsecurity22/presentation/albertini">https://www.usenix.org/conference/usenixsecurity22/presentation/albertini</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="BH22">[BH22]</dt>
+        <dd>
+<span class="refAuthor">Bellare, M.</span> and <span class="refAuthor">V. T. Hoang</span>, <span class="refTitle">"Efficient Schemes for Committing Authenticated Encryption"</span>, <span class="refContent">EUROCRYPT 2022. Lecture Notes in Computer Science, vol 13276, pp. 845-875</span>, <span class="seriesInfo">DOI 10.1007/978-3-031-07085-3_29</span>, <time datetime="2022" class="refDate">2022</time>, <span>&lt;<a href="https://eprint.iacr.org/2022/268">https://eprint.iacr.org/2022/268</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="BN00">[BN00]</dt>
+        <dd>
+<span class="refAuthor">Bellare, M.</span> and <span class="refAuthor">C. Namprempre</span>, <span class="refTitle">"Authenticated encryption: Relations among notions and analysis of the generic composition paradigm"</span>, <span class="refContent">ASIACRYPT 2000. Lecture Notes in Computer Science, vol 1976, pp. 531-545</span>, <span class="seriesInfo">DOI 10.1007/3-540-44448-3_41</span>, <time datetime="2000" class="refDate">2000</time>, <span>&lt;<a href="https://eprint.iacr.org/2000/025">https://eprint.iacr.org/2000/025</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="DGRW18">[DGRW18]</dt>
+        <dd>
+<span class="refAuthor">Dodis, Y.</span>, <span class="refAuthor">Grubbs, P.</span>, <span class="refAuthor">Ristenpart, T.</span>, and <span class="refAuthor">J. Woodage</span>, <span class="refTitle">"Fast Message Franking: From Invisible Salamanders to Encryptment"</span>, <span class="refContent">CRYPTO 2018. Lecture Notes in Computer Science, vol 10991, pp. 155-186</span>, <span class="seriesInfo">DOI 10.1007/978-3-319-96884-1_6</span>, <time datetime="2018" class="refDate">2018</time>, <span>&lt;<a href="https://eprint.iacr.org/2019/016.pdf">https://eprint.iacr.org/2019/016.pdf</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="GCM">[GCM]</dt>
+        <dd>
+<span class="refAuthor">Dworkin, M.</span>, <span class="refTitle">"NIST Special Publication 800-38D: Recommendation for Block Cipher Modes of Operation: Galois/Counter Mode (GCM) and GMAC"</span>, <span class="refContent">U.S. National Institute of Standards and Technology</span>, <time datetime="2007-11" class="refDate">November 2007</time>, <span>&lt;<a href="https://csrc.nist.gov/publications/nistpubs/800-38D/SP-800-38D.pdf">https://csrc.nist.gov/publications/nistpubs/800-38D/SP-800-38D.pdf</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="GLR17">[GLR17]</dt>
+        <dd>
+<span class="refAuthor">Grubbs, P.</span>, <span class="refAuthor">Lu, J.</span>, and <span class="refAuthor">T. Ristenpart</span>, <span class="refTitle">"Message Franking via Committing Authenticated Encryption"</span>, <span class="refContent">CRYPTO 2017. Lecture Notes in Computer Science, vol 10403, pp. 66-97</span>, <span class="seriesInfo">DOI 10.1007/978-3-319-63697-9_3</span>, <time datetime="2017" class="refDate">2017</time>, <span>&lt;<a href="https://eprint.iacr.org/2017/664">https://eprint.iacr.org/2017/664</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="LGR21">[LGR21]</dt>
+      <dd>
+<span class="refAuthor">Len, J.</span>, <span class="refAuthor">Grubbs, P.</span>, and <span class="refAuthor">T. Ristenpart</span>, <span class="refTitle">"Partitioning Oracle Attacks"</span>, <span class="refContent">30th USENIX Security Symposium (USENIX Security 21), pp. 195–212</span>, <time datetime="2021" class="refDate">2021</time>, <span>&lt;<a href="https://www.usenix.org/conference/usenixsecurity21/presentation/len">https://www.usenix.org/conference/usenixsecurity21/presentation/len</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+</section>
+<div id="test-vectors">
+<section id="appendix-A">
+      <h2 id="name-test-vectors">
+<a href="#appendix-A" class="section-number selfRef">Appendix A. </a><a href="#name-test-vectors" class="section-name selfRef">Test Vectors</a>
+      </h2>
+<div id="chacha20-blake2b-1">
+<section id="appendix-A.1">
+        <h3 id="name-chacha20-blake2b-2">
+<a href="#appendix-A.1" class="section-number selfRef">A.1. </a><a href="#name-chacha20-blake2b-2" class="section-name selfRef">ChaCha20-BLAKE2b</a>
+        </h3>
+<div id="test-vector-1">
+<section id="appendix-A.1.1">
+          <h4 id="name-test-vector-1">
+<a href="#appendix-A.1.1" class="section-number selfRef">A.1.1. </a><a href="#name-test-vector-1" class="section-name selfRef">Test Vector 1</a>
+          </h4>
+<div class="alignLeft art-text artwork" id="appendix-A.1.1-1">
+<pre>
+plaintext: 5468657265277320736f6d6520676f6f6420696e207468697320776f726c642c204d722e2046726f646f2c20616e64206974277320776f727468206669676874696e6720666f722e
+
+nonce: 000000000000000000000000
+
+key: 1001000000000000000000000000000000000000000000000000000000000000
+
+associatedData:
+
+ciphertext: 18337327ef02753bf8d996db218a3697c18943ea6efc86a7e449cb67a7592b9e1715a07771797c93789350528e2e7a8d25b4ca7a7d2968776d50577946cb5da693f1e09309236b7bdb04001a8feeab7de48946f08df1cfd0ce03a719232ea7106efb8706e40d7cb6
+</pre><a href="#appendix-A.1.1-1" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="test-vector-2">
+<section id="appendix-A.1.2">
+          <h4 id="name-test-vector-2">
+<a href="#appendix-A.1.2" class="section-number selfRef">A.1.2. </a><a href="#name-test-vector-2" class="section-name selfRef">Test Vector 2</a>
+          </h4>
+<div class="alignLeft art-text artwork" id="appendix-A.1.2-1">
+<pre>
+plaintext:
+
+nonce: 000000000000000000000000
+
+key: 1001000000000000000000000000000000000000000000000000000000000000
+
+associatedData:
+
+ciphertext: a1ad6c7c4a9bb8201cf72904ebea1fed709c75ded85adaea7034bdbba1b5ec4f
+</pre><a href="#appendix-A.1.2-1" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="test-vector-3">
+<section id="appendix-A.1.3">
+          <h4 id="name-test-vector-3">
+<a href="#appendix-A.1.3" class="section-number selfRef">A.1.3. </a><a href="#name-test-vector-3" class="section-name selfRef">Test Vector 3</a>
+          </h4>
+<div class="alignLeft art-text artwork" id="appendix-A.1.3-1">
+<pre>
+plaintext:
+
+nonce: 000000000000000000000000
+
+key: 1001000000000000000000000000000000000000000000000000000000000000
+
+associatedData: 76312e302e30
+
+ciphertext: c0deb4501fe4cc651687cff8c9f5377072d4788cfe2d0f51dd97fab7b16fab84
+</pre><a href="#appendix-A.1.3-1" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="test-vector-4">
+<section id="appendix-A.1.4">
+          <h4 id="name-test-vector-4">
+<a href="#appendix-A.1.4" class="section-number selfRef">A.1.4. </a><a href="#name-test-vector-4" class="section-name selfRef">Test Vector 4</a>
+          </h4>
+<div class="alignLeft art-text artwork" id="appendix-A.1.4-1">
+<pre>
+plaintext: 5468657265277320736f6d6520676f6f6420696e207468697320776f726c642c204d722e2046726f646f2c20616e64206974277320776f727468206669676874696e6720666f722e
+
+nonce: 010000000000000000000000
+
+key: 1001000000000000000000000000000000000000000000000000000000000000
+
+associatedData:
+
+ciphertext: db685e0ff12fafd611a832c90e6c7905598ed65babdf6d8cf7057d07b5168673727dda3ef3d6ed2520332c8036e2ce0f72c413290bc4ae41d2d398e4cb2d1f6e906e232ae471ca0ea4ade513d685a4fab9a886fa885b6f6b54ff04d66612cfdde669bd0dbda23f54
+</pre><a href="#appendix-A.1.4-1" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="test-vector-5">
+<section id="appendix-A.1.5">
+          <h4 id="name-test-vector-5">
+<a href="#appendix-A.1.5" class="section-number selfRef">A.1.5. </a><a href="#name-test-vector-5" class="section-name selfRef">Test Vector 5</a>
+          </h4>
+<div class="alignLeft art-text artwork" id="appendix-A.1.5-1">
+<pre>
+plaintext: 5468657265277320736f6d6520676f6f6420696e207468697320776f726c642c204d722e2046726f646f2c20616e64206974277320776f727468206669676874696e6720666f722e
+
+nonce: 000000000000000000000000
+
+key: 1002000000000000000000000000000000000000000000000000000000000000
+
+associatedData:
+
+ciphertext: 308319762a72faf302e6d34c2f882c27addc1b2130549e55a084bcdc189c2da0497fdbab20989f24a25f2d3934ac825caaf46ec61a853a06eb97b14c2ced147b94c2223506862d32af0be2b1f658597412e65d77560844eee38a190063300c8e8a8c62ea25b943b3
+</pre><a href="#appendix-A.1.5-1" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="test-vector-6">
+<section id="appendix-A.1.6">
+          <h4 id="name-test-vector-6">
+<a href="#appendix-A.1.6" class="section-number selfRef">A.1.6. </a><a href="#name-test-vector-6" class="section-name selfRef">Test Vector 6</a>
+          </h4>
+<p id="appendix-A.1.6-1">This test <span class="bcp14">MUST</span> return an "authentication failed" error.<a href="#appendix-A.1.6-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="appendix-A.1.6-2">
+<pre>
+ciphertext: 408319762a72faf302e6d34c2f882c27addc1b2130549e55a084bcdc189c2da0497fdbab20989f24a25f2d3934ac825caaf46ec61a853a06eb97b14c2ced147b94c2223506862d32af0be2b1f658597412e65d77560844eee38a190063300c8e8a8c62ea25b943b3
+
+nonce: 000000000000000000000000
+
+key: 1002000000000000000000000000000000000000000000000000000000000000
+
+associatedData:
+</pre><a href="#appendix-A.1.6-2" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="test-vector-7">
+<section id="appendix-A.1.7">
+          <h4 id="name-test-vector-7">
+<a href="#appendix-A.1.7" class="section-number selfRef">A.1.7. </a><a href="#name-test-vector-7" class="section-name selfRef">Test Vector 7</a>
+          </h4>
+<p id="appendix-A.1.7-1">This test <span class="bcp14">MUST</span> return an "authentication failed" error.<a href="#appendix-A.1.7-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="appendix-A.1.7-2">
+<pre>
+ciphertext: 308319762a72faf302e6d34c2f882c27addc1b2130549e55a084bcdc189c2da0497fdbab20989f24a25f2d3934ac825caaf46ec61a853a06eb97b14c2ced147b94c2223506862d32af0be2b1f658597412e65d77560844eee38a190063300c8e8a8c62ea25b943b4
+
+nonce: 000000000000000000000000
+
+key: 1002000000000000000000000000000000000000000000000000000000000000
+
+associatedData:
+</pre><a href="#appendix-A.1.7-2" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="test-vector-8">
+<section id="appendix-A.1.8">
+          <h4 id="name-test-vector-8">
+<a href="#appendix-A.1.8" class="section-number selfRef">A.1.8. </a><a href="#name-test-vector-8" class="section-name selfRef">Test Vector 8</a>
+          </h4>
+<p id="appendix-A.1.8-1">This test <span class="bcp14">MUST</span> return an "authentication failed" error.<a href="#appendix-A.1.8-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="appendix-A.1.8-2">
+<pre>
+ciphertext: 308319762a72faf302e6d34c2f882c27addc1b2130549e55a084bcdc189c2da0497fdbab20989f24a25f2d3934ac825caaf46ec61a853a06eb97b14c2ced147b94c2223506862d32af0be2b1f658597412e65d77560844eee38a190063300c8e8a8c62ea25b943b3
+
+nonce: 000000000000000000000001
+
+key: 1002000000000000000000000000000000000000000000000000000000000000
+
+associatedData:
+</pre><a href="#appendix-A.1.8-2" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="test-vector-9">
+<section id="appendix-A.1.9">
+          <h4 id="name-test-vector-9">
+<a href="#appendix-A.1.9" class="section-number selfRef">A.1.9. </a><a href="#name-test-vector-9" class="section-name selfRef">Test Vector 9</a>
+          </h4>
+<p id="appendix-A.1.9-1">This test <span class="bcp14">MUST</span> return an "authentication failed" error.<a href="#appendix-A.1.9-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="appendix-A.1.9-2">
+<pre>
+ciphertext: 308319762a72faf302e6d34c2f882c27addc1b2130549e55a084bcdc189c2da0497fdbab20989f24a25f2d3934ac825caaf46ec61a853a06eb97b14c2ced147b94c2223506862d32af0be2b1f658597412e65d77560844eee38a190063300c8e8a8c62ea25b943b3
+
+nonce: 000000000000000000000000
+
+key: 1003000000000000000000000000000000000000000000000000000000000000
+
+associatedData:
+</pre><a href="#appendix-A.1.9-2" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="test-vector-10">
+<section id="appendix-A.1.10">
+          <h4 id="name-test-vector-10">
+<a href="#appendix-A.1.10" class="section-number selfRef">A.1.10. </a><a href="#name-test-vector-10" class="section-name selfRef">Test Vector 10</a>
+          </h4>
+<p id="appendix-A.1.10-1">This test <span class="bcp14">MUST</span> return an "authentication failed" error.<a href="#appendix-A.1.10-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="appendix-A.1.10-2">
+<pre>
+ciphertext: 308319762a72faf302e6d34c2f882c27addc1b2130549e55a084bcdc189c2da0497fdbab20989f24a25f2d3934ac825caaf46ec61a853a06eb97b14c2ced147b94c2223506862d32af0be2b1f658597412e65d77560844eee38a190063300c8e8a8c62ea25b943b3
+
+nonce: 000000000000000000000000
+
+key: 1002000000000000000000000000000000000000000000000000000000000000
+
+associatedData: 76312e302e30
+</pre><a href="#appendix-A.1.10-2" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+</section>
+</div>
+</section>
+</div>
+<div id="acknowledgments">
+<section id="appendix-B">
+      <h2 id="name-acknowledgments">
+<a href="#name-acknowledgments" class="section-name selfRef">Acknowledgments</a>
+      </h2>
+<p id="appendix-B-1">Thank you to Viet Tung Hoang, Julia Len, and Paul Grubbs for their excellent presentations on the topic of committing authenticated encryption.<a href="#appendix-B-1" class="pilcrow">¶</a></p>
+<p id="appendix-B-2">ChaCha20 and Poly1305 were designed by Daniel J. Bernstein.<a href="#appendix-B-2" class="pilcrow">¶</a></p>
+<p id="appendix-B-3">BLAKE2 was designed by Jean-Philippe Aumasson, Samuel Neves, Zooko Wilcox-O'Hearn, and Christian Winnerlein.<a href="#appendix-B-3" class="pilcrow">¶</a></p>
+<p id="appendix-B-4">HMAC was designed by Mihir Bellare, Ran Canetti, and Hugo Krawczyk.<a href="#appendix-B-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="authors-addresses">
+<section id="appendix-C">
+      <h2 id="name-authors-address">
+<a href="#name-authors-address" class="section-name selfRef">Author's Address</a>
+      </h2>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Samuel Lucas</span></div>
+<div dir="auto" class="left"><span class="org">Individual Contributor</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:samuel-lucas6@pm.me" class="email">samuel-lucas6@pm.me</a>
+</div>
+</address>
+</section>
+</div>
+<script>const toc = document.getElementById("toc");
+toc.querySelector("h2").addEventListener("click", e => {
+  toc.classList.toggle("active");
+});
+toc.querySelector("nav").addEventListener("click", e => {
+  toc.classList.remove("active");
+});
+</script>
+</body>
+</html>
