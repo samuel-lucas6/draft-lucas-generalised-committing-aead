@@ -36,18 +36,11 @@ public static class ChaCha20BLAKE2b
         Span<byte> ciphertextNoTag = ciphertext[..plaintext.Length];
         ChaCha20.Encrypt(ciphertextNoTag, plaintext, nonce, encryptionKey);
         
-        Span<byte> tag = stackalloc byte[T_LEN];
+        Span<byte> tag = ciphertext[^T_LEN..];
         ComputeTag(tag, associatedData, ciphertextNoTag, macKey);
         
         CryptographicOperations.ZeroMemory(encryptionKey);
         CryptographicOperations.ZeroMemory(macKey);
-        
-        if (ciphertextNoTag.Length == 0) {
-            tag.CopyTo(ciphertext);
-            return;
-        }
-        
-        Spans.Concat(ciphertext, ciphertextNoTag, tag);
     }
     
     public static void Decrypt(Span<byte> plaintext, ReadOnlySpan<byte> ciphertext, ReadOnlySpan<byte> nonce, ReadOnlySpan<byte> key, ReadOnlySpan<byte> associatedData = default)
@@ -68,9 +61,11 @@ public static class ChaCha20BLAKE2b
         Span<byte> computedTag = stackalloc byte[T_LEN];
         ComputeTag(computedTag, associatedData, ciphertextNoTag, macKey);
         
+        bool valid = ConstantTime.Equals(tag, computedTag);
         CryptographicOperations.ZeroMemory(macKey);
+        CryptographicOperations.ZeroMemory(computedTag);
         
-        if (!ConstantTime.Equals(tag, computedTag)) {
+        if (!valid) {
             CryptographicOperations.ZeroMemory(encryptionKey);
             throw new CryptographicException("Authentication failed.");
         }
