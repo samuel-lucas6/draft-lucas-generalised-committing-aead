@@ -9,26 +9,26 @@
 <meta content="
        This document describes how to construct a committing authenticated encryption with associated data (cAEAD) algorithm by combining an unauthenticated cipher and collision-resistant, hash-based message authentication code (MAC). 
     " name="description">
-<meta content="xml2rfc 3.15.3" name="generator">
+<meta content="xml2rfc 3.16.0" name="generator">
 <meta content="Internet-Draft" name="keyword">
 <meta content="draft-lucas-generalised-committing-aead-latest" name="ietf.draft">
 <!-- Generator version information:
-  xml2rfc 3.15.3
-    Python 3.10.8
+  xml2rfc 3.16.0
+    Python 3.10.10
     appdirs 1.4.4
     ConfigArgParse 1.5.3
     google-i18n-address 2.5.2
     html5lib 1.1
     intervaltree 3.1.0
     Jinja2 3.1.2
-    lxml 4.9.1
+    lxml 4.9.2
     MarkupSafe 2.1.1
     pycountry 22.3.5
     PyYAML 6.0
     requests 2.28.1
     setuptools 65.6.0
     six 1.16.0
-    wcwidth 0.2.5
+    wcwidth 0.2.6
 -->
 <link href="draft-lucas-generalised-committing-aead.xml" rel="alternate" type="application/rfc+xml">
 <link href="#copyright" rel="license">
@@ -359,7 +359,7 @@ ul.empty li, .ulEmpty li {
   margin-top: 0.5em;
 }
 :is(ul, ol).compact, .ulCompact, .olCompact {
-  line-height: 100%;
+  line-height: 1;
   margin: 0 0 0 2em;
 }
 
@@ -369,10 +369,13 @@ dl {
   --indent: 3ch;
   /* --indent: attr(indent ch); not supported in any browser, but we can dream */
 }
+dl.olPercent {
+  --indent: 5ch;
+}
 dl > dt {
   float: left;
-  margin-right: 1em;
-  min-width: 12ch;
+  margin-right: 2ch;
+  min-width: 8ch;
 }
 dl.dlNewline > dt {
   float: none;
@@ -381,6 +384,9 @@ dl > dd {
   margin-bottom: .8em;
   margin-left: var(--indent) !important; /* stupid element overrides */
   min-height: 2ex;
+}
+dl.olPercent > dt {
+  min-width: calc(var(--indent) - 2ch);
 }
 :is(dl.compact, .dlCompact) > dd {
   margin-bottom: 0;
@@ -395,7 +401,7 @@ dl > dd > dl {
   margin-top: 0.5em;
   margin-bottom: 0;
 }
-dl .break {
+:is(dd, span).break {
   display: none;
 }
 
@@ -403,11 +409,11 @@ dl .break {
 a, a[href].selfRef:hover {
   text-decoration: none;
 }
-a[href].selfRef {
-  color: var(--text-color);
-}
 a[href] {
   color: var(--link-color);
+}
+a[href].selfRef, .iref + a[href].internal {
+  color: var(--text-color);
 }
 a[href]:hover {
   text-decoration: underline;
@@ -415,7 +421,7 @@ a[href]:hover {
 a[href].selfRef:hover {
   background-color: var(--highlight-color);
 }
-a.xref {
+a.xref:is(.cite, .auto), :is(#status-of-memo, #copyright) a {
   white-space: nowrap;
 }
 
@@ -427,7 +433,9 @@ tt, code, pre {
 tt, code {
   /* changing the font for inline elements leads to different ascender
      and descender heights; as we want to retain baseline alignment,
-     remove leading to avoid altering the final height of lines */
+     remove leading to avoid altering the final height of lines
+     note: this fails if these blocks take an entire line,
+     a different solution would be great */
   line-height: 0;
 }
 :is(h1, h2, h3, h4, h5, h6) :is(tt, code) {
@@ -579,10 +587,14 @@ hr {
 .bcp14 {
   font-variant: small-caps;
   font-weight: 600;
-  font-size: 14.5px;
+  font-size: var(--small-font-size);
 }
 .role {
   font-variant: all-small-caps;
+}
+sub, sup {
+  line-height: 1;
+  font-size: 80%;
 }
 
 /* info block */
@@ -1024,7 +1036,7 @@ svg :is([stroke="white"], [stroke^="#fff"]) {
 svg :is([fill="black"], [fill^="#000"], :not([fill])) {
   fill: var(--text-color);
 }
-svg :is([stroke="fill"], [fill^="#fff"]) {
+svg :is([fill="white"], [fill^="#fff"]) {
   fill: var(--background-color);
 }
 </style>
@@ -1035,11 +1047,11 @@ svg :is([stroke="fill"], [fill^="#fff"]) {
 <thead><tr>
 <td class="left">Internet-Draft</td>
 <td class="center">Encrypt-then-MAC for Committing AEAD (cA</td>
-<td class="right">December 2022</td>
+<td class="right">March 2023</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">Lucas</td>
-<td class="center">Expires 10 June 2023</td>
+<td class="center">Expires 9 September 2023</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1052,12 +1064,12 @@ svg :is([stroke="fill"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-lucas-generalised-committing-aead-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2022-12-07" class="published">7 December 2022</time>
+<time datetime="2023-03-08" class="published">8 March 2023</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2023-06-10">10 June 2023</time></dd>
+<dd class="expires"><time datetime="2023-09-09">9 September 2023</time></dd>
 <dt class="label-authors">Author:</dt>
 <dd class="authors">
 <div class="author">
@@ -1099,7 +1111,7 @@ svg :is([stroke="fill"], [fill^="#fff"]) {
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 10 June 2023.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 9 September 2023.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1108,7 +1120,7 @@ svg :is([stroke="fill"], [fill^="#fff"]) {
 <a href="#name-copyright-notice" class="section-name selfRef">Copyright Notice</a>
         </h2>
 <p id="section-boilerplate.2-1">
-            Copyright (c) 2022 IETF Trust and the persons identified as the
+            Copyright (c) 2023 IETF Trust and the persons identified as the
             document authors. All rights reserved.<a href="#section-boilerplate.2-1" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.2-2">
             This document is subject to BCP 78 and the IETF Trust's Legal
@@ -1223,7 +1235,7 @@ svg :is([stroke="fill"], [fill^="#fff"]) {
 <p id="section-1-1">Authenticated encryption with associated data (AEAD) schemes provide confidentiality and authenticity. However, research has revealed that if keys can be adversarial, these properties are not enough. Instead, AEADs also need to be committing, meaning the ciphertext is a binding commitment of all the AEAD inputs. This requires collision resistance <span>[<a href="#BH22" class="cite xref">BH22</a>]</span>.<a href="#section-1-1" class="pilcrow">¶</a></p>
 <p id="section-1-2">Unfortunately, many existing AEAD schemes, such as AES-GCM <span>[<a href="#GCM" class="cite xref">GCM</a>]</span> and ChaCha20-Poly1305 <span>[<a href="#RFC8439" class="cite xref">RFC8439</a>]</span>, are not committing. This means it is possible for authentication to pass for multiple different keys. Thus, a ciphertext can be successfully decrypted to different plaintexts <span>[<a href="#ADGKLS22" class="cite xref">ADGKLS22</a>]</span>. Furthermore, an attacker who knows the key can find different messages that lead to the same authentication tag.<a href="#section-1-2" class="pilcrow">¶</a></p>
 <p id="section-1-3">This has led to practical attacks, such as the partitioning oracle attack <span>[<a href="#LGR21" class="cite xref">LGR21</a>]</span>, which can allow an attacker to guess many encryption passwords at once by repeatedly providing a ciphertext that successfully decrypts under different keys to an oracle (e.g. a server that knows the encryption key). Such a ciphertext that potentially decrypts under thousands of keys can quickly be computed by an attacker, although the complexity and scalability of attacks depends on the AEAD. This exploits a lack of key commitment.<a href="#section-1-3" class="pilcrow">¶</a></p>
-<p id="section-1-4">Another type of attack was demonstrated on Facebook Messenger's message franking scheme <span>[<a href="#DGRW18" class="cite xref">DGRW18</a>]</span>, which exploited a lack of message commitment. Due to end-to-end encryption, Facebook does not know a recipient's key. Therefore, when reporting a received message as abusive, the recipient must send their key for verification. However, a fake key could be used by the recipient to transform a harmless message from the sender into an abusive one.<a href="#section-1-4" class="pilcrow">¶</a></p>
+<p id="section-1-4">Another type of attack was demonstrated on Facebook Messenger’s message franking scheme <span>[<a href="#DGRW18" class="cite xref">DGRW18</a>]</span>, which exploited a lack of message commitment. Due to end-to-end encryption, Facebook does not know a recipient’s key. Therefore, when reporting a received message as abusive, the recipient must send their key for verification. However, a fake key could be used by the recipient to transform a harmless message from the sender into an abusive one.<a href="#section-1-4" class="pilcrow">¶</a></p>
 <p id="section-1-5">Whilst such attacks only apply in certain scenarios, developers intuitively expect an AEAD to be committing, increasing the risk of falling prey to this type of protocol vulnerability. Moreover, certain mitigations require changes to primitives and cryptographic libraries, and many naive mitigations may leak information. For example, the padding fix and generic UtC transform <span>[<a href="#ADGKLS22" class="cite xref">ADGKLS22</a>]</span> may lead to timing differences during decryption, and prepending an unsalted hash of the key leaks its identity.<a href="#section-1-5" class="pilcrow">¶</a></p>
 <p id="section-1-6">However, Encrypt-then-MAC with the encryption key and authentication key derived from the same input keying material and a 256-bit or greater authentication tag from a collision-resistant, hash-based MAC is committing <span>[<a href="#GLR17" class="cite xref">GLR17</a>]</span>. This combination has been widely used, well analysed <span>[<a href="#BN00" class="cite xref">BN00</a>]</span>, provides additional security against forgeries, and can sometimes be more performant than certain existing AEAD schemes.<a href="#section-1-6" class="pilcrow">¶</a></p>
 <p id="section-1-7">The partitioning oracle attack authors recommend using a committing AEAD (cAEAD) by default when non-committing AEAD vulnerabilities cannot be ruled out <span>[<a href="#LGR21" class="cite xref">LGR21</a>]</span>. Therefore, this document introduces a simple Encrypt-then-MAC cAEAD scheme that can be implemented using an unauthenticated cipher and collision-resistant, hash-based MAC from a cryptographic library. For instance, ChaCha20 <span>[<a href="#RFC8439" class="cite xref">RFC8439</a>]</span> and BLAKE2b <span>[<a href="#RFC7693" class="cite xref">RFC7693</a>]</span>.<a href="#section-1-7" class="pilcrow">¶</a></p>
@@ -1234,8 +1246,8 @@ svg :is([stroke="fill"], [fill^="#fff"]) {
       <h2 id="name-conventions-and-definitions">
 <a href="#section-2" class="section-number selfRef">2. </a><a href="#name-conventions-and-definitions" class="section-name selfRef">Conventions and Definitions</a>
       </h2>
-<p id="section-2-1">The key words "<span class="bcp14">MUST</span>", "<span class="bcp14">MUST NOT</span>", "<span class="bcp14">REQUIRED</span>", "<span class="bcp14">SHALL</span>", "<span class="bcp14">SHALL NOT</span>", "<span class="bcp14">SHOULD</span>", "<span class="bcp14">SHOULD NOT</span>", "<span class="bcp14">RECOMMENDED</span>", "<span class="bcp14">NOT RECOMMENDED</span>",
-"<span class="bcp14">MAY</span>", and "<span class="bcp14">OPTIONAL</span>" in this document are to be interpreted as
+<p id="section-2-1">The key words “<span class="bcp14">MUST</span>”, “<span class="bcp14">MUST NOT</span>”, “<span class="bcp14">REQUIRED</span>”, “<span class="bcp14">SHALL</span>”, “<span class="bcp14">SHALL NOT</span>”, “<span class="bcp14">SHOULD</span>”, “<span class="bcp14">SHOULD NOT</span>”, “<span class="bcp14">RECOMMENDED</span>”, “<span class="bcp14">NOT RECOMMENDED</span>”,
+“<span class="bcp14">MAY</span>”, and “<span class="bcp14">OPTIONAL</span>” in this document are to be interpreted as
 described in BCP 14 <span>[<a href="#RFC2119" class="cite xref">RFC2119</a>]</span> <span>[<a href="#RFC8174" class="cite xref">RFC8174</a>]</span> when, and only when, they
 appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶</a></p>
 <p id="section-2-2">Operations:<a href="#section-2-2" class="pilcrow">¶</a></p>
@@ -1664,7 +1676,7 @@ ciphertext: 308319762a72faf302e6d34c2f882c27addc1b2130549e55a084bcdc189c2da0497f
           <h4 id="name-test-vector-6">
 <a href="#appendix-A.1.6" class="section-number selfRef">A.1.6. </a><a href="#name-test-vector-6" class="section-name selfRef">Test Vector 6</a>
           </h4>
-<p id="appendix-A.1.6-1">This test <span class="bcp14">MUST</span> return an "authentication failed" error.<a href="#appendix-A.1.6-1" class="pilcrow">¶</a></p>
+<p id="appendix-A.1.6-1">This test <span class="bcp14">MUST</span> return an “authentication failed” error.<a href="#appendix-A.1.6-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="appendix-A.1.6-2">
 <pre>
 ciphertext: 408319762a72faf302e6d34c2f882c27addc1b2130549e55a084bcdc189c2da0497fdbab20989f24a25f2d3934ac825caaf46ec61a853a06eb97b14c2ced147b94c2223506862d32af0be2b1f658597412e65d77560844eee38a190063300c8e8a8c62ea25b943b3
@@ -1683,7 +1695,7 @@ associatedData:
           <h4 id="name-test-vector-7">
 <a href="#appendix-A.1.7" class="section-number selfRef">A.1.7. </a><a href="#name-test-vector-7" class="section-name selfRef">Test Vector 7</a>
           </h4>
-<p id="appendix-A.1.7-1">This test <span class="bcp14">MUST</span> return an "authentication failed" error.<a href="#appendix-A.1.7-1" class="pilcrow">¶</a></p>
+<p id="appendix-A.1.7-1">This test <span class="bcp14">MUST</span> return an “authentication failed” error.<a href="#appendix-A.1.7-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="appendix-A.1.7-2">
 <pre>
 ciphertext: 308319762a72faf302e6d34c2f882c27addc1b2130549e55a084bcdc189c2da0497fdbab20989f24a25f2d3934ac825caaf46ec61a853a06eb97b14c2ced147b94c2223506862d32af0be2b1f658597412e65d77560844eee38a190063300c8e8a8c62ea25b943b4
@@ -1702,7 +1714,7 @@ associatedData:
           <h4 id="name-test-vector-8">
 <a href="#appendix-A.1.8" class="section-number selfRef">A.1.8. </a><a href="#name-test-vector-8" class="section-name selfRef">Test Vector 8</a>
           </h4>
-<p id="appendix-A.1.8-1">This test <span class="bcp14">MUST</span> return an "authentication failed" error.<a href="#appendix-A.1.8-1" class="pilcrow">¶</a></p>
+<p id="appendix-A.1.8-1">This test <span class="bcp14">MUST</span> return an “authentication failed” error.<a href="#appendix-A.1.8-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="appendix-A.1.8-2">
 <pre>
 ciphertext: 308319762a72faf302e6d34c2f882c27addc1b2130549e55a084bcdc189c2da0497fdbab20989f24a25f2d3934ac825caaf46ec61a853a06eb97b14c2ced147b94c2223506862d32af0be2b1f658597412e65d77560844eee38a190063300c8e8a8c62ea25b943b3
@@ -1721,7 +1733,7 @@ associatedData:
           <h4 id="name-test-vector-9">
 <a href="#appendix-A.1.9" class="section-number selfRef">A.1.9. </a><a href="#name-test-vector-9" class="section-name selfRef">Test Vector 9</a>
           </h4>
-<p id="appendix-A.1.9-1">This test <span class="bcp14">MUST</span> return an "authentication failed" error.<a href="#appendix-A.1.9-1" class="pilcrow">¶</a></p>
+<p id="appendix-A.1.9-1">This test <span class="bcp14">MUST</span> return an “authentication failed” error.<a href="#appendix-A.1.9-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="appendix-A.1.9-2">
 <pre>
 ciphertext: 308319762a72faf302e6d34c2f882c27addc1b2130549e55a084bcdc189c2da0497fdbab20989f24a25f2d3934ac825caaf46ec61a853a06eb97b14c2ced147b94c2223506862d32af0be2b1f658597412e65d77560844eee38a190063300c8e8a8c62ea25b943b3
@@ -1740,7 +1752,7 @@ associatedData:
           <h4 id="name-test-vector-10">
 <a href="#appendix-A.1.10" class="section-number selfRef">A.1.10. </a><a href="#name-test-vector-10" class="section-name selfRef">Test Vector 10</a>
           </h4>
-<p id="appendix-A.1.10-1">This test <span class="bcp14">MUST</span> return an "authentication failed" error.<a href="#appendix-A.1.10-1" class="pilcrow">¶</a></p>
+<p id="appendix-A.1.10-1">This test <span class="bcp14">MUST</span> return an “authentication failed” error.<a href="#appendix-A.1.10-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="appendix-A.1.10-2">
 <pre>
 ciphertext: 308319762a72faf302e6d34c2f882c27addc1b2130549e55a084bcdc189c2da0497fdbab20989f24a25f2d3934ac825caaf46ec61a853a06eb97b14c2ced147b94c2223506862d32af0be2b1f658597412e65d77560844eee38a190063300c8e8a8c62ea25b943b3
@@ -1765,7 +1777,7 @@ associatedData: 76312e302e30
       </h2>
 <p id="appendix-B-1">Thank you to Viet Tung Hoang, Julia Len, and Paul Grubbs for their excellent presentations on the topic of committing authenticated encryption.<a href="#appendix-B-1" class="pilcrow">¶</a></p>
 <p id="appendix-B-2">ChaCha20 and Poly1305 were designed by Daniel J. Bernstein.<a href="#appendix-B-2" class="pilcrow">¶</a></p>
-<p id="appendix-B-3">BLAKE2 was designed by Jean-Philippe Aumasson, Samuel Neves, Zooko Wilcox-O'Hearn, and Christian Winnerlein.<a href="#appendix-B-3" class="pilcrow">¶</a></p>
+<p id="appendix-B-3">BLAKE2 was designed by Jean-Philippe Aumasson, Samuel Neves, Zooko Wilcox-O’Hearn, and Christian Winnerlein.<a href="#appendix-B-3" class="pilcrow">¶</a></p>
 <p id="appendix-B-4">HMAC was designed by Mihir Bellare, Ran Canetti, and Hugo Krawczyk.<a href="#appendix-B-4" class="pilcrow">¶</a></p>
 </section>
 </div>

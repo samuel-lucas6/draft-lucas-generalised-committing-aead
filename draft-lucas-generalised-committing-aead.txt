@@ -4,8 +4,8 @@
 
 Network Working Group                                           S. Lucas
 Internet-Draft                                    Individual Contributor
-Intended status: Informational                           7 December 2022
-Expires: 10 June 2023
+Intended status: Informational                              8 March 2023
+Expires: 9 September 2023
 
 
               Encrypt-then-MAC for Committing AEAD (cAEAD)
@@ -41,11 +41,11 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 10 June 2023.
+   This Internet-Draft will expire on 9 September 2023.
 
 Copyright Notice
 
-   Copyright (c) 2022 IETF Trust and the persons identified as the
+   Copyright (c) 2023 IETF Trust and the persons identified as the
    document authors.  All rights reserved.
 
    This document is subject to BCP 78 and the IETF Trust's Legal
@@ -110,10 +110,10 @@ Table of Contents
    by an attacker, although the complexity and scalability of attacks
    depends on the AEAD.  This exploits a lack of key commitment.
 
-   Another type of attack was demonstrated on Facebook Messenger's
+   Another type of attack was demonstrated on Facebook Messenger’s
    message franking scheme [DGRW18], which exploited a lack of message
    commitment.  Due to end-to-end encryption, Facebook does not know a
-   recipient's key.  Therefore, when reporting a received message as
+   recipient’s key.  Therefore, when reporting a received message as
    abusive, the recipient must send their key for verification.
    However, a fake key could be used by the recipient to transform a
    harmless message from the sender into an abusive one.
@@ -144,9 +144,9 @@ Table of Contents
 
 2.  Conventions and Definitions
 
-   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
-   "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
-   "OPTIONAL" in this document are to be interpreted as described in
+   The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”,
+   “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “NOT RECOMMENDED”, “MAY”, and
+   “OPTIONAL” in this document are to be interpreted as described in
    BCP 14 [RFC2119] [RFC8174] when, and only when, they appear in all
    capitals, as shown here.
 
@@ -536,7 +536,7 @@ ciphertext: 308319762a72faf302e6d34c2f882c27addc1b2130549e55a084bcdc189c2da0497f
 
 A.1.6.  Test Vector 6
 
-   This test MUST return an "authentication failed" error.
+   This test MUST return an “authentication failed” error.
 
 ciphertext: 408319762a72faf302e6d34c2f882c27addc1b2130549e55a084bcdc189c2da0497fdbab20989f24a25f2d3934ac825caaf46ec61a853a06eb97b14c2ced147b94c2223506862d32af0be2b1f658597412e65d77560844eee38a190063300c8e8a8c62ea25b943b3
 
@@ -548,7 +548,7 @@ associatedData:
 
 A.1.7.  Test Vector 7
 
-   This test MUST return an "authentication failed" error.
+   This test MUST return an “authentication failed” error.
 
 ciphertext: 308319762a72faf302e6d34c2f882c27addc1b2130549e55a084bcdc189c2da0497fdbab20989f24a25f2d3934ac825caaf46ec61a853a06eb97b14c2ced147b94c2223506862d32af0be2b1f658597412e65d77560844eee38a190063300c8e8a8c62ea25b943b4
 
@@ -560,7 +560,7 @@ associatedData:
 
 A.1.8.  Test Vector 8
 
-   This test MUST return an "authentication failed" error.
+   This test MUST return an “authentication failed” error.
 
 ciphertext: 308319762a72faf302e6d34c2f882c27addc1b2130549e55a084bcdc189c2da0497fdbab20989f24a25f2d3934ac825caaf46ec61a853a06eb97b14c2ced147b94c2223506862d32af0be2b1f658597412e65d77560844eee38a190063300c8e8a8c62ea25b943b3
 
@@ -572,7 +572,7 @@ associatedData:
 
 A.1.9.  Test Vector 9
 
-   This test MUST return an "authentication failed" error.
+   This test MUST return an “authentication failed” error.
 
 ciphertext: 308319762a72faf302e6d34c2f882c27addc1b2130549e55a084bcdc189c2da0497fdbab20989f24a25f2d3934ac825caaf46ec61a853a06eb97b14c2ced147b94c2223506862d32af0be2b1f658597412e65d77560844eee38a190063300c8e8a8c62ea25b943b3
 
@@ -584,7 +584,7 @@ associatedData:
 
 A.1.10.  Test Vector 10
 
-   This test MUST return an "authentication failed" error.
+   This test MUST return an “authentication failed” error.
 
 ciphertext: 308319762a72faf302e6d34c2f882c27addc1b2130549e55a084bcdc189c2da0497fdbab20989f24a25f2d3934ac825caaf46ec61a853a06eb97b14c2ced147b94c2223506862d32af0be2b1f658597412e65d77560844eee38a190063300c8e8a8c62ea25b943b3
 
@@ -603,7 +603,7 @@ Acknowledgments
    ChaCha20 and Poly1305 were designed by Daniel J.  Bernstein.
 
    BLAKE2 was designed by Jean-Philippe Aumasson, Samuel Neves, Zooko
-   Wilcox-O'Hearn, and Christian Winnerlein.
+   Wilcox-O’Hearn, and Christian Winnerlein.
 
    HMAC was designed by Mihir Bellare, Ran Canetti, and Hugo Krawczyk.
 
