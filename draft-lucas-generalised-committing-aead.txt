@@ -4,8 +4,8 @@
 
 Network Working Group                                           S. Lucas
 Internet-Draft                                    Individual Contributor
-Intended status: Informational                              8 March 2023
-Expires: 9 September 2023
+Intended status: Informational                          14 December 2024
+Expires: 17 June 2025
 
 
               Encrypt-then-MAC for Committing AEAD (cAEAD)
@@ -41,11 +41,11 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 9 September 2023.
+   This Internet-Draft will expire on 17 June 2025.
 
 Copyright Notice
 
-   Copyright (c) 2023 IETF Trust and the persons identified as the
+   Copyright (c) 2024 IETF Trust and the persons identified as the
    document authors.  All rights reserved.
 
    This document is subject to BCP 78 and the IETF Trust's Legal
@@ -181,19 +181,19 @@ Table of Contents
    *  T_LEN: the authentication tag length, which MUST be 32 octets (256
       bits).
 
-   *  ENCRYPTION_CONTEXT: "Cipher.Encrypt()", replacing "Cipher" with
+   *  ENCRYPTION_CONTEXT: “Cipher.Encrypt()”, replacing “Cipher” with
       the properly capitalised and punctuated name of the cipher being
-      used.  For example, "ChaCha20.Encrypt()" or "AES-CTR.Encrypt()".
+      used.  For example, “ChaCha20.Encrypt()” or “AES-CTR.Encrypt()”.
 
-   *  MAC_CONTEXT: "MAC.KeyedHash()", replacing "MAC" with the properly
+   *  MAC_CONTEXT: “MAC.KeyedHash()”, replacing “MAC” with the properly
       capitalised and punctuated name of the MAC being used, followed by
-      "-" and the output length in bits if that is missing from the
+      “-“ and the output length in bits if that is missing from the
       name.  If the MAC output length is being truncated, both the full
       output length and truncated output length MUST be specified.  For
-      example, "BLAKE2b-256.KeyedHash()", "BLAKE2b-512-256.KeyedHash()"
-      (truncated BLAKE2b-512), "HMAC-SHA-256.KeyedHash()", "HMAC-SHA-
-      512-256.KeyedHash()" (truncated HMAC-SHA-512), or "HMAC-SHA-
-      512/256.KeyedHash()" (HMAC with the SHA-512/256 algorithm).
+      example, “BLAKE2b-256.KeyedHash()”, “BLAKE2b-512-256.KeyedHash()”
+      (truncated BLAKE2b-512), “HMAC-SHA-256.KeyedHash()”, “HMAC-SHA-
+      512-256.KeyedHash()” (truncated HMAC-SHA-512), or “HMAC-SHA-
+      512/256.KeyedHash()” (HMAC with the SHA-512/256 algorithm).
 
    Inputs and outputs:
 
@@ -329,9 +329,9 @@ else
 
    The context strings are:
 
-   *  ENCRYPTION_CONTEXT: "ChaCha20.Encrypt()".
+   *  ENCRYPTION_CONTEXT: “ChaCha20.Encrypt()”.
 
-   *  MAC_CONTEXT: "BLAKE2b-256.KeyedHash()".
+   *  MAC_CONTEXT: “BLAKE2b-256.KeyedHash()”.
 
    The ChaCha20 specific input and output lengths are:
 
@@ -409,7 +409,7 @@ else
               Encryption", RFC 5116, DOI 10.17487/RFC5116, January 2008,
               <https://www.rfc-editor.org/rfc/rfc5116>.
 
-   [RFC7693]  Saarinen, M-J., Ed. and J-P. Aumasson, "The BLAKE2
+   [RFC7693]  Saarinen, M., Ed. and J. Aumasson, "The BLAKE2
               Cryptographic Hash and Message Authentication Code (MAC)",
               RFC 7693, DOI 10.17487/RFC7693, November 2015,
               <https://www.rfc-editor.org/rfc/rfc7693>.
