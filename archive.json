@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-09-03T01:16:28.603257+00:00",
+  "timestamp": "2024-12-15T02:04:47.441656+00:00",
   "repo": "samuel-lucas6/draft-lucas-generalised-committing-aead",
   "labels": [
     {
@@ -49,6 +49,38 @@
       "color": "ffffff"
     }
   ],
-  "issues": [],
+  "issues": [
+    {
+      "number": 1,
+      "id": "I_kwDOHow-Wc6iDzXH",
+      "title": "Question about further development",
+      "url": "https://github.com/samuel-lucas6/draft-lucas-generalised-committing-aead/issues/1",
+      "state": "CLOSED",
+      "author": "stsch9",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "Hi,\r\n\r\nwill this draft be further developed? (modern ciphers such as Aegis do not seem to have the key committing property). (Does it make sense to use blake3 as a MAC function, since it is faster than blake2b?)",
+      "createdAt": "2024-12-04T22:22:52Z",
+      "updatedAt": "2024-12-06T08:34:08Z",
+      "closedAt": "2024-12-06T08:34:08Z",
+      "comments": [
+        {
+          "author": "samuel-lucas6",
+          "authorAssociation": "OWNER",
+          "body": "Hi, thanks for your interest in the draft. I'm not sure to be honest. I need to prioritise other projects at the moment, and I don't think there's much interest in generic composition schemes. The current design could be optimised for performance.\r\n\r\nAEGIS is key committing assuming the attacker can't control the associated data, Ascon offers context commitment, and there are efforts to standardise a SHAKE-based AEAD at NIST. So, there's some progress being made. There are also lots of patches to non-committing schemes that seem to be viewed more favourably by the community (there's a lot more research on this topic).\r\n\r\nBLAKE3 is a good choice for the MAC. It should be faster in most cases, but I've seen BLAKE2b in libsodium be faster with certain message sizes during testing of a [similar scheme](https://github.com/samuel-lucas6/dissertation/blob/main/src/cAEAD/Proposals/Schemes/Nonce/cEtMBLAKE2b.cs). Both ChaCha20-BLAKE2b and ChaCha20-BLAKE3 can be faster than ChaCha20-Poly1305 in some cases.\r\n\r\nBLAKE2b was chosen for the draft because it's more widely available, has an RFC, and has a higher security margin. There's now an Internet-Draft for BLAKE3 though, and the number of BLAKE2 constructions is rather silly. Another good choice in the future might be KangarooTwelve.",
+          "createdAt": "2024-12-05T17:29:09Z",
+          "updatedAt": "2024-12-05T17:29:09Z"
+        },
+        {
+          "author": "stsch9",
+          "authorAssociation": "NONE",
+          "body": "Thank you for the very detailed answer.\r\nIf you are looking for test vectors for chacha20-blake3, you can use these [here](https://github.com/stsch9/chacha20-blake2b-python/blob/main/test/test_chacha20_blake3.py) \ud83d\ude09.\r\nOf course you can close the issue/question.",
+          "createdAt": "2024-12-06T07:09:05Z",
+          "updatedAt": "2024-12-06T07:09:05Z"
+        }
+      ]
+    }
+  ],
   "pulls": []
 }
