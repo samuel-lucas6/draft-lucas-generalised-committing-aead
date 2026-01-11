@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-01-08T02:21:30.429519+00:00",
+  "timestamp": "2026-01-11T02:32:35.484508+00:00",
   "repo": "samuel-lucas6/draft-lucas-generalised-committing-aead",
   "labels": [
     {
@@ -78,6 +78,30 @@
           "body": "Thank you for the very detailed answer.\r\nIf you are looking for test vectors for chacha20-blake3, you can use these [here](https://github.com/stsch9/chacha20-blake2b-python/blob/main/test/test_chacha20_blake3.py) \ud83d\ude09.\r\nOf course you can close the issue/question.",
           "createdAt": "2024-12-06T07:09:05Z",
           "updatedAt": "2024-12-06T07:09:05Z"
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "id": "I_kwDOHow-Wc7iP5vq",
+      "title": "KDF improvement?",
+      "url": "https://github.com/samuel-lucas6/draft-lucas-generalised-committing-aead/issues/2",
+      "state": "OPEN",
+      "author": "notABot101010",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "Hello and thank you for your work on this important topic!\n\nI'm also currently working on a similar problem and have a few observations and suggestions:\n\nI was wondering about the relevance of:\n\n```\nencryptionKey = MAC(UTF8(ENCRYPTION_CONTEXT), key, K_LEN)\nmacKey = MAC(UTF8(MAC_CONTEXT) || nonce, key, K_LEN)\n```\n\nPerforming a double MAC has a huge performance impact, especially on shorter messages, and the context separation strings have this feeling of \"being dirty\" in a sense that is hard to explain, but they don't feel very elegant.\n\nI've came up with the following scheme which needs a single MAC (KDF) call and still commit the nonce:\n\n```\nkdf_output = MAC(nonce, key, 64 + encryption_nonce_size)\nencryption_key = kdf_output[0:32]\nauthentication_key = kdf_output[32:64]\nencryption_nonce = kdf_output[64:]\n```\n\nIf context / domain separation is really important, it could be:\n```\nkdf_output = MAC(\"My-AEAD\" || nonce, key, 64 + encryption_nonce_size)\n```\n\n\nThis construction has the benefit of providing full nonce committement and nonce extension at the same time. It's also, to the best of my knowledge, the construction that requires the less computation when you need both context committement and nonce extension.\n\nWhat do you think?\n\n",
+      "createdAt": "2026-01-09T07:35:14Z",
+      "updatedAt": "2026-01-10T19:38:54Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "samuel-lucas6",
+          "authorAssociation": "OWNER",
+          "body": "Hi, thanks for sharing your key derivation approach. I agree that a single call feels cleaner and is more performant. I've done that since writing this document (e.g., [this](https://github.com/samuel-lucas6/dissertation/blob/main/src/cAEAD/Proposals/Schemes/Nonce/cEtMBLAKE3.cs)). The subnonce approach is also fine when you have an XOF, but part of what motivated two calls was being restricted to a non-XOF and perhaps not a 512-bit output for two keys.\n\nAfter hearing about [chacha20-blake3](https://github.com/skerkour/chacha20-blake3), I actually started drafting a blog post about generic composition for AEAD that touches on this but never finished due to other things happening.\n\nSubkeys can either be static, nonce-based, or associated data (AD)-based, with these having different trade-offs. I like AD-based best because it's like the duplex and provides some level of misuse resistance (the key and nonce can be accidentally repeated if the associated data is different). This also means no concatenation/length encoding when computing a tag over the ciphertext/plaintext. Then the KDF ordering can allow static associated data to be cached for the same key. However, you need the associated data before encryption.\n\nI think the domain separation is unnecessary for a generic construction like this but is arguably better practice.",
+          "createdAt": "2026-01-10T19:38:54Z",
+          "updatedAt": "2026-01-10T19:38:54Z"
         }
       ]
     }
